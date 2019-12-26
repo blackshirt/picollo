@@ -1,0 +1,110 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+enum Role {
+	Admin
+	User
+	Guest
+}
+
+enum ModelType {
+	Rup 
+	Opd
+	Packet
+}
+
+enum Kategori {
+	Penyedia
+	Swakelola
+	PenyediaDlmSwakelola
+}
+
+enum Metode  {
+	Kontes
+	EPurchasing
+	PengadaanLangsung
+	PenunjukanLangsung
+	Swakelola
+	Sayembara
+	Seleksi
+	Tender
+	TenderCepat
+	Dikecualikan
+}
+
+enum State {
+	NotReady
+	InProgress
+	Warning
+	Finish
+}
+
+enum Jenis {
+	Barang
+	Konstruksi
+	Konsultansi
+	JasaLainnya
+}
+
+type RupItem {
+	id:         ID!
+	kodeOpd:    String!
+	namaOpd: 	String!
+	kodeRup:    String! 
+	kegiatan: 	String
+	namaPaket:  String! 
+	pagu:       String! 
+	sumberDana: String! 
+	waktu:      String!
+	tahun:      String!
+	kategori:   Kategori!
+    metode:     Metode!
+	state:      State
+	jenis:      Jenis
+	detilWaktu: Waktu
+}
+
+type RupRekapItem {
+	id:          			ID!          
+	kodeOpd:     			String!         
+	namaOpd:     			String!         
+	numPenyedia: 			Int!  
+	numPaguPenyedia:    	Int!  
+	numSwakelola:       	Int! 
+	numPaguSwakelola:   	Int! 
+	numPenyediaDlmSwa: 		Int!
+	numPaguPenyediaDlmSwa:  Int!
+	totalPaket:         	Int!
+	TotalPagu:          	Int!
+	rups: 					[RupItem]!
+	tahun: 					String!
+}
+
+type Planning {
+	awal: String
+	akhir: String
+}
+
+type RencanaWaktu {
+	pemilihan: Planning
+	pelaksanaan: Planning
+	pemanfaatan: Planning
+}
+
+union Waktu = Planning | RencanaWaktu
+
+input RupOptions {
+    kodeOpd:    String!
+	kategori:   Kategori!
+	metode:     Metode
+	state:      State
+	jenis:      Jenis
+	tahun: 		String!
+}
+
+type Query {
+  viewOpd(id: String!): RupRekapItem!
+  viewRup(options: RupOptions) : [RupItem]!
+}
+
