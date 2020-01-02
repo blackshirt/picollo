@@ -48,7 +48,7 @@ func TestGetRupItemWithKey(t *testing.T) {
 
 func TestNewService(t *testing.T) {
 	var ctx context.Context = context.TODO()
-	var w waktu
+	// var w waktu
 	// Create a new instance of the mock store
 	m := new(mockStorage)
 	// In the "On" method, we assert that we want the "Get" method
@@ -56,13 +56,13 @@ func TestNewService(t *testing.T) {
 	// In the "Return" method, we define the return values to be 7, and nil (for the result and error values)
 	m.On("GetRup", ctx, "020708eb-09b1-44de-a880-9dc769224b41").Return(
 		RupItem{
-			DetilWaktu: w,
+			DetilWaktu: nil,
 			ID:         "020708eb-09b1-44de-a880-9dc769224b41",
 			Jenis:      nil,
-			Kategori:   "Penyedia",
+			Kategori:   KategoriPenyedia,
 			KodeOpd:    "63408",
 			KodeRup:    "22836111",
-			Metode:     "Tender",
+			Metode:     Tender,
 			NamaPaket:  "Rehabilitasi TPI Pasir",
 			Pagu:       "350000000",
 			State:      nil,

@@ -23,14 +23,20 @@ models:
 
  RupOptions:
   model: picollo/model.RupOptions
-
+ RupItem:
+  model: picollo/model.RupItem
+  
  Waktu:
    model: picollo/model.Waktu
- StatePengadaan:
-   model: picollo/model.StatePengadaan
- JenisPengadaan:
-   model: picollo/model.JenisPengadaan
- KategoriPengadaan:
-  model: picollo/model.KategoriPengadaan
- MetodePengadaan:
-  model: picollo/model.MetodePengadaan
+ State:
+   model: picollo/model.State
+ Jenis:
+   model: picollo/model.Jenis
+ Kategori:
+  model: picollo/model.Kategori
+ Metode:
+  model: picollo/model.Metode
+ Type:
+  model: picollo/model.Type
+ Role:
+  model: picollo/model.Role

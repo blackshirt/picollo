@@ -21,12 +21,15 @@ type queryResolver struct{ *Resolver }
 func (r *queryResolver) ViewOpd(ctx context.Context, id string) (*model.RupRekapItem, error) {
 	panic("not implemented")
 }
-func (r *queryResolver) ViewRup(ctx context.Context, options *model.RupOptions) ([]*RupItem, error) {
+func (r *queryResolver) ViewRup(ctx context.Context, options *model.RupOptions) ([]*model.RupItem, error) {
 	panic("not implemented")
 }
 
 type rupRekapItemResolver struct{ *Resolver }
 
-func (r *rupRekapItemResolver) Rups(ctx context.Context, obj *model.RupRekapItem) ([]*RupItem, error) {
+func (r *rupRekapItemResolver) Rups(ctx context.Context, obj *model.RupRekapItem) ([]*model.RupItem, error) {
+	panic("not implemented")
+}
+func (r *rupRekapItemResolver) Tahun(ctx context.Context, obj *model.RupRekapItem) (string, error) {
 	panic("not implemented")
 }

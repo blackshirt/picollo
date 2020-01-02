@@ -97,10 +97,10 @@ type ComplexityRoot struct {
 
 type QueryResolver interface {
 	ViewOpd(ctx context.Context, id string) (*model.RupRekapItem, error)
-	ViewRup(ctx context.Context, options *model.RupOptions) ([]*RupItem, error)
+	ViewRup(ctx context.Context, options *model.RupOptions) ([]*model.RupItem, error)
 }
 type RupRekapItemResolver interface {
-	Rups(ctx context.Context, obj *model.RupRekapItem) ([]*RupItem, error)
+	Rups(ctx context.Context, obj *model.RupRekapItem) ([]*model.RupItem, error)
 	Tahun(ctx context.Context, obj *model.RupRekapItem) (string, error)
 }
 
@@ -433,19 +433,22 @@ enum Role {
 	Guest
 }
 
-enum ModelType {
+enum Type {
+	UnknownType
 	Rup 
 	Opd
 	Packet
 }
 
 enum Kategori {
-	Penyedia
-	Swakelola
-	PenyediaDlmSwakelola
+	UnknownKategori
+	KategoriPenyedia
+	KategoriSwakelola
+	KategoriPenyediaDlmSwakelola
 }
 
 enum Metode  {
+	UnknownMetode
 	Kontes
 	EPurchasing
 	PengadaanLangsung
@@ -466,6 +469,7 @@ enum State {
 }
 
 enum Jenis {
+	UnknownJenis
 	Barang
 	Konstruksi
 	Konsultansi
@@ -768,10 +772,10 @@ func (ec *executionContext) _Query_viewRup(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*RupItem)
+	res := resTmp.([]*model.RupItem)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRupItem2ᚕᚖpicolloᚐRupItem(ctx, field.Selections, res)
+	return ec.marshalNRupItem2ᚕᚖpicolloᚋmodelᚐRupItem(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -951,7 +955,7 @@ func (ec *executionContext) _RencanaWaktu_pemanfaatan(ctx context.Context, field
 	return ec.marshalOPlanning2ᚖpicolloᚐPlanning(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_id(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_id(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -988,7 +992,7 @@ func (ec *executionContext) _RupItem_id(ctx context.Context, field graphql.Colle
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_kodeOpd(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_kodeOpd(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1025,7 +1029,7 @@ func (ec *executionContext) _RupItem_kodeOpd(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_namaOpd(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_namaOpd(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1062,7 +1066,7 @@ func (ec *executionContext) _RupItem_namaOpd(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_kodeRup(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_kodeRup(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1099,7 +1103,7 @@ func (ec *executionContext) _RupItem_kodeRup(ctx context.Context, field graphql.
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_kegiatan(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_kegiatan(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1133,7 +1137,7 @@ func (ec *executionContext) _RupItem_kegiatan(ctx context.Context, field graphql
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_namaPaket(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_namaPaket(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1170,7 +1174,7 @@ func (ec *executionContext) _RupItem_namaPaket(ctx context.Context, field graphq
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_pagu(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_pagu(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1207,7 +1211,7 @@ func (ec *executionContext) _RupItem_pagu(ctx context.Context, field graphql.Col
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_sumberDana(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_sumberDana(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1244,7 +1248,7 @@ func (ec *executionContext) _RupItem_sumberDana(ctx context.Context, field graph
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_waktu(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_waktu(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1281,7 +1285,7 @@ func (ec *executionContext) _RupItem_waktu(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_tahun(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_tahun(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1318,7 +1322,7 @@ func (ec *executionContext) _RupItem_tahun(ctx context.Context, field graphql.Co
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_kategori(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_kategori(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1349,13 +1353,13 @@ func (ec *executionContext) _RupItem_kategori(ctx context.Context, field graphql
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Kategori)
+	res := resTmp.(model.Kategori)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNKategori2picolloᚐKategori(ctx, field.Selections, res)
+	return ec.marshalNKategori2picolloᚋmodelᚐKategori(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_metode(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_metode(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1386,13 +1390,13 @@ func (ec *executionContext) _RupItem_metode(ctx context.Context, field graphql.C
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Metode)
+	res := resTmp.(model.Metode)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNMetode2picolloᚐMetode(ctx, field.Selections, res)
+	return ec.marshalNMetode2picolloᚋmodelᚐMetode(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_state(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_state(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1420,13 +1424,13 @@ func (ec *executionContext) _RupItem_state(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*State)
+	res := resTmp.(*model.State)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOState2ᚖpicolloᚐState(ctx, field.Selections, res)
+	return ec.marshalOState2ᚖpicolloᚋmodelᚐState(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_jenis(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_jenis(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1454,13 +1458,13 @@ func (ec *executionContext) _RupItem_jenis(ctx context.Context, field graphql.Co
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*Jenis)
+	res := resTmp.(*model.Jenis)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalOJenis2ᚖpicolloᚐJenis(ctx, field.Selections, res)
+	return ec.marshalOJenis2ᚖpicolloᚋmodelᚐJenis(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RupItem_detilWaktu(ctx context.Context, field graphql.CollectedField, obj *RupItem) (ret graphql.Marshaler) {
+func (ec *executionContext) _RupItem_detilWaktu(ctx context.Context, field graphql.CollectedField, obj *model.RupItem) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -1932,10 +1936,10 @@ func (ec *executionContext) _RupRekapItem_rups(ctx context.Context, field graphq
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*RupItem)
+	res := resTmp.([]*model.RupItem)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRupItem2ᚕᚖpicolloᚐRupItem(ctx, field.Selections, res)
+	return ec.marshalNRupItem2ᚕᚖpicolloᚋmodelᚐRupItem(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _RupRekapItem_tahun(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
@@ -3140,25 +3144,25 @@ func (ec *executionContext) unmarshalInputRupOptions(ctx context.Context, obj in
 			}
 		case "kategori":
 			var err error
-			it.Kategori, err = ec.unmarshalNKategori2picolloᚐKategori(ctx, v)
+			it.Kategori, err = ec.unmarshalNKategori2picolloᚋmodelᚐKategori(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "metode":
 			var err error
-			it.Metode, err = ec.unmarshalOMetode2ᚖpicolloᚐMetode(ctx, v)
+			it.Metode, err = ec.unmarshalOMetode2ᚖpicolloᚋmodelᚐMetode(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "state":
 			var err error
-			it.State, err = ec.unmarshalOState2ᚖpicolloᚐState(ctx, v)
+			it.State, err = ec.unmarshalOState2ᚖpicolloᚋmodelᚐState(ctx, v)
 			if err != nil {
 				return it, err
 			}
 		case "jenis":
 			var err error
-			it.Jenis, err = ec.unmarshalOJenis2ᚖpicolloᚐJenis(ctx, v)
+			it.Jenis, err = ec.unmarshalOJenis2ᚖpicolloᚋmodelᚐJenis(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -3313,7 +3317,7 @@ func (ec *executionContext) _RencanaWaktu(ctx context.Context, sel ast.Selection
 
 var rupItemImplementors = []string{"RupItem"}
 
-func (ec *executionContext) _RupItem(ctx context.Context, sel ast.SelectionSet, obj *RupItem) graphql.Marshaler {
+func (ec *executionContext) _RupItem(ctx context.Context, sel ast.SelectionSet, obj *model.RupItem) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, rupItemImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3788,25 +3792,25 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNKategori2picolloᚐKategori(ctx context.Context, v interface{}) (Kategori, error) {
-	var res Kategori
+func (ec *executionContext) unmarshalNKategori2picolloᚋmodelᚐKategori(ctx context.Context, v interface{}) (model.Kategori, error) {
+	var res model.Kategori
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNKategori2picolloᚐKategori(ctx context.Context, sel ast.SelectionSet, v Kategori) graphql.Marshaler {
+func (ec *executionContext) marshalNKategori2picolloᚋmodelᚐKategori(ctx context.Context, sel ast.SelectionSet, v model.Kategori) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalNMetode2picolloᚐMetode(ctx context.Context, v interface{}) (Metode, error) {
-	var res Metode
+func (ec *executionContext) unmarshalNMetode2picolloᚋmodelᚐMetode(ctx context.Context, v interface{}) (model.Metode, error) {
+	var res model.Metode
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalNMetode2picolloᚐMetode(ctx context.Context, sel ast.SelectionSet, v Metode) graphql.Marshaler {
+func (ec *executionContext) marshalNMetode2picolloᚋmodelᚐMetode(ctx context.Context, sel ast.SelectionSet, v model.Metode) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) marshalNRupItem2ᚕᚖpicolloᚐRupItem(ctx context.Context, sel ast.SelectionSet, v []*RupItem) graphql.Marshaler {
+func (ec *executionContext) marshalNRupItem2ᚕᚖpicolloᚋmodelᚐRupItem(ctx context.Context, sel ast.SelectionSet, v []*model.RupItem) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3830,7 +3834,7 @@ func (ec *executionContext) marshalNRupItem2ᚕᚖpicolloᚐRupItem(ctx context.
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalORupItem2ᚖpicolloᚐRupItem(ctx, sel, v[i])
+			ret[i] = ec.marshalORupItem2ᚖpicolloᚋmodelᚐRupItem(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -4120,48 +4124,48 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return ec.marshalOBoolean2bool(ctx, sel, *v)
 }
 
-func (ec *executionContext) unmarshalOJenis2picolloᚐJenis(ctx context.Context, v interface{}) (Jenis, error) {
-	var res Jenis
+func (ec *executionContext) unmarshalOJenis2picolloᚋmodelᚐJenis(ctx context.Context, v interface{}) (model.Jenis, error) {
+	var res model.Jenis
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalOJenis2picolloᚐJenis(ctx context.Context, sel ast.SelectionSet, v Jenis) graphql.Marshaler {
+func (ec *executionContext) marshalOJenis2picolloᚋmodelᚐJenis(ctx context.Context, sel ast.SelectionSet, v model.Jenis) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalOJenis2ᚖpicolloᚐJenis(ctx context.Context, v interface{}) (*Jenis, error) {
+func (ec *executionContext) unmarshalOJenis2ᚖpicolloᚋmodelᚐJenis(ctx context.Context, v interface{}) (*model.Jenis, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOJenis2picolloᚐJenis(ctx, v)
+	res, err := ec.unmarshalOJenis2picolloᚋmodelᚐJenis(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) marshalOJenis2ᚖpicolloᚐJenis(ctx context.Context, sel ast.SelectionSet, v *Jenis) graphql.Marshaler {
+func (ec *executionContext) marshalOJenis2ᚖpicolloᚋmodelᚐJenis(ctx context.Context, sel ast.SelectionSet, v *model.Jenis) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return v
 }
 
-func (ec *executionContext) unmarshalOMetode2picolloᚐMetode(ctx context.Context, v interface{}) (Metode, error) {
-	var res Metode
+func (ec *executionContext) unmarshalOMetode2picolloᚋmodelᚐMetode(ctx context.Context, v interface{}) (model.Metode, error) {
+	var res model.Metode
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalOMetode2picolloᚐMetode(ctx context.Context, sel ast.SelectionSet, v Metode) graphql.Marshaler {
+func (ec *executionContext) marshalOMetode2picolloᚋmodelᚐMetode(ctx context.Context, sel ast.SelectionSet, v model.Metode) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalOMetode2ᚖpicolloᚐMetode(ctx context.Context, v interface{}) (*Metode, error) {
+func (ec *executionContext) unmarshalOMetode2ᚖpicolloᚋmodelᚐMetode(ctx context.Context, v interface{}) (*model.Metode, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOMetode2picolloᚐMetode(ctx, v)
+	res, err := ec.unmarshalOMetode2picolloᚋmodelᚐMetode(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) marshalOMetode2ᚖpicolloᚐMetode(ctx context.Context, sel ast.SelectionSet, v *Metode) graphql.Marshaler {
+func (ec *executionContext) marshalOMetode2ᚖpicolloᚋmodelᚐMetode(ctx context.Context, sel ast.SelectionSet, v *model.Metode) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4179,11 +4183,11 @@ func (ec *executionContext) marshalOPlanning2ᚖpicolloᚐPlanning(ctx context.C
 	return ec._Planning(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalORupItem2picolloᚐRupItem(ctx context.Context, sel ast.SelectionSet, v RupItem) graphql.Marshaler {
+func (ec *executionContext) marshalORupItem2picolloᚋmodelᚐRupItem(ctx context.Context, sel ast.SelectionSet, v model.RupItem) graphql.Marshaler {
 	return ec._RupItem(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalORupItem2ᚖpicolloᚐRupItem(ctx context.Context, sel ast.SelectionSet, v *RupItem) graphql.Marshaler {
+func (ec *executionContext) marshalORupItem2ᚖpicolloᚋmodelᚐRupItem(ctx context.Context, sel ast.SelectionSet, v *model.RupItem) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -4202,24 +4206,24 @@ func (ec *executionContext) unmarshalORupOptions2ᚖpicolloᚋmodelᚐRupOptions
 	return &res, err
 }
 
-func (ec *executionContext) unmarshalOState2picolloᚐState(ctx context.Context, v interface{}) (State, error) {
-	var res State
+func (ec *executionContext) unmarshalOState2picolloᚋmodelᚐState(ctx context.Context, v interface{}) (model.State, error) {
+	var res model.State
 	return res, res.UnmarshalGQL(v)
 }
 
-func (ec *executionContext) marshalOState2picolloᚐState(ctx context.Context, sel ast.SelectionSet, v State) graphql.Marshaler {
+func (ec *executionContext) marshalOState2picolloᚋmodelᚐState(ctx context.Context, sel ast.SelectionSet, v model.State) graphql.Marshaler {
 	return v
 }
 
-func (ec *executionContext) unmarshalOState2ᚖpicolloᚐState(ctx context.Context, v interface{}) (*State, error) {
+func (ec *executionContext) unmarshalOState2ᚖpicolloᚋmodelᚐState(ctx context.Context, v interface{}) (*model.State, error) {
 	if v == nil {
 		return nil, nil
 	}
-	res, err := ec.unmarshalOState2picolloᚐState(ctx, v)
+	res, err := ec.unmarshalOState2picolloᚋmodelᚐState(ctx, v)
 	return &res, err
 }
 
-func (ec *executionContext) marshalOState2ᚖpicolloᚐState(ctx context.Context, sel ast.SelectionSet, v *State) graphql.Marshaler {
+func (ec *executionContext) marshalOState2ᚖpicolloᚋmodelᚐState(ctx context.Context, sel ast.SelectionSet, v *model.State) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

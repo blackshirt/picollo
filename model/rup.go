@@ -41,8 +41,8 @@ type RupOptions struct {
 }
 
 type Storage interface {
-	GetRup(ctx context.Context, pkey string) (RupItem, error)      // Get rup item for specific key
-	GetOpd(ctx context.Context, pkey string) (RupRekapItem, error) //// Get opd for specific key
+	GetRup(ctx context.Context, id string) (RupItem, error)      // Get rup item for specific key
+	GetOpd(ctx context.Context, id string) (RupRekapItem, error) //// Get opd for specific key
 	SaveRup(ctx context.Context, objs []RupItem) error
 	SaveOpd(ctx context.Context, objs []RupRekapItem) error
 	Rup(ctx context.Context, opt RupOptions) ([]RupItem, error)
@@ -55,14 +55,14 @@ type rethinkStorage struct {
 	session *r.Session
 }
 
-func NewStorage(s *r.Session) Storage {
+func NewRethinkStorage(s *r.Session) Storage {
 	return &rethinkStorage{session: s}
 }
 
 //
-func (repo *rethinkStorage) GetRup(ctx context.Context, pkey string) (RupItem, error) {
+func (repo *rethinkStorage) GetRup(ctx context.Context, id string) (RupItem, error) {
 	var m RupItem
-	res, err := r.Table("rup_item").Get(pkey).Run(repo.session, r.RunOpts{Context: ctx})
+	res, err := r.Table("rup_item").Get(id).Run(repo.session, r.RunOpts{Context: ctx})
 	res.One(&m)
 	return m, err
 }
@@ -166,7 +166,3 @@ func (s *rupService) Rup(ctx context.Context, opt RupOptions) ([]RupItem, error)
 	rups, err := s.repo.Rup(ctx, opt)
 	return rups, err
 }
-
-type waktu string
-
-func (w waktu) IsWaktu() {}

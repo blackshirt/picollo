@@ -8,19 +8,22 @@ enum Role {
 	Guest
 }
 
-enum ModelType {
+enum Type {
+	UnknownType
 	Rup 
 	Opd
 	Packet
 }
 
 enum Kategori {
-	Penyedia
-	Swakelola
-	PenyediaDlmSwakelola
+	UnknownKategori
+	KategoriPenyedia
+	KategoriSwakelola
+	KategoriPenyediaDlmSwakelola
 }
 
 enum Metode  {
+	UnknownMetode
 	Kontes
 	EPurchasing
 	PengadaanLangsung
@@ -41,6 +44,7 @@ enum State {
 }
 
 enum Jenis {
+	UnknownJenis
 	Barang
 	Konstruksi
 	Konsultansi
