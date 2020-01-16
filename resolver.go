@@ -9,27 +9,42 @@ import (
 
 type Resolver struct{}
 
+func (r *Resolver) OpdItem() OpdItemResolver {
+	return &opdItemResolver{r}
+}
 func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
-func (r *Resolver) RupRekapItem() RupRekapItemResolver {
-	return &rupRekapItemResolver{r}
+func (r *Resolver) RencanaWaktu() RencanaWaktuResolver {
+	return &rencanaWaktuResolver{r}
+}
+
+type opdItemResolver struct{ *Resolver }
+
+func (r *opdItemResolver) Rups(ctx context.Context, obj *model.OpdItem) ([]*model.RupItem, error) {
+	panic("not implemented")
+}
+func (r *opdItemResolver) Tahun(ctx context.Context, obj *model.OpdItem) (string, error) {
+	panic("not implemented")
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) ViewOpd(ctx context.Context, id string) (*model.RupRekapItem, error) {
+func (r *queryResolver) ViewOpd(ctx context.Context, id string) (*model.OpdItem, error) {
 	panic("not implemented")
 }
 func (r *queryResolver) ViewRup(ctx context.Context, options *model.RupOptions) ([]*model.RupItem, error) {
 	panic("not implemented")
 }
 
-type rupRekapItemResolver struct{ *Resolver }
+type rencanaWaktuResolver struct{ *Resolver }
 
-func (r *rupRekapItemResolver) Rups(ctx context.Context, obj *model.RupRekapItem) ([]*model.RupItem, error) {
+func (r *rencanaWaktuResolver) Pemilihan(ctx context.Context, obj *model.RencanaWaktu) (*Planning, error) {
 	panic("not implemented")
 }
-func (r *rupRekapItemResolver) Tahun(ctx context.Context, obj *model.RupRekapItem) (string, error) {
+func (r *rencanaWaktuResolver) Pelaksanaan(ctx context.Context, obj *model.RencanaWaktu) (*Planning, error) {
+	panic("not implemented")
+}
+func (r *rencanaWaktuResolver) Pemanfaatan(ctx context.Context, obj *model.RencanaWaktu) (*Planning, error) {
 	panic("not implemented")
 }

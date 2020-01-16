@@ -6,291 +6,132 @@ import (
 	"strconv"
 )
 
-// Type represent underlying data model
-type Type int
+type Jenis string
 
 const (
-	UnknownType Type = iota // 0
-	Rup                     // 1
-	Opd                     // 2
-	Packet                  // 3
+	JenisBarang      Jenis = "Barang"
+	JenisKonstruksi  Jenis = "Konstruksi"
+	JenisKonsultansi Jenis = "Konsultansi"
+	JenisJasaLainnya Jenis = "JasaLainnya"
 )
 
-func TypeFrom(str string) (Type, error) {
-	switch str {
-	case "UnknownType":
-		return UnknownType, nil
-	case "Rup":
-		return Rup, nil
-	case "Opd":
-		return Opd, nil
-	case "Packet":
-		return Packet, nil
-	default:
-		return -1, fmt.Errorf("%s is not a valid Type", str)
-	}
+var AllJenis = []Jenis{
+	JenisBarang,
+	JenisKonstruksi,
+	JenisKonsultansi,
+	JenisJasaLainnya,
 }
-
-func (e Type) IsValid() bool {
-	switch e {
-	case UnknownType, Rup, Opd, Packet:
-		return true
-	}
-	return false
-}
-
-func (e Type) String() string {
-	switch e {
-	case UnknownType:
-		return "UnknownType"
-	case Rup:
-		return "Rup"
-	case Opd:
-		return "Opd"
-	case Packet:
-		return "Packet"
-
-	default:
-		panic("invalid enum Type value")
-	}
-}
-
-func (e *Type) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	var err error
-	*e, err = TypeFrom(str)
-	return err
-}
-
-func (e Type) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-//Jenis represent jenis pengadaan
-type Jenis int
-
-const (
-	UnknownJenis Jenis = iota // 0
-	Barang                    // 1
-	Konstruksi                // 2
-	Konsultansi               // 3
-	JasaLainnya               // 4
-)
 
 func (e Jenis) IsValid() bool {
 	switch e {
-	case UnknownJenis, Barang, Konstruksi, Konsultansi, JasaLainnya:
+	case JenisBarang, JenisKonstruksi, JenisKonsultansi, JenisJasaLainnya:
 		return true
 	}
 	return false
 }
 
-func JenisFrom(str string) (Jenis, error) {
-	switch str {
-	case "UnknownJenis":
-		return UnknownJenis, nil
-	case "Barang":
-		return Barang, nil
-	case "Konstruksi":
-		return Konstruksi, nil
-	case "Konsultansi":
-		return Konsultansi, nil
-	case "JasaLainnya":
-		return JasaLainnya, nil
-
-	default:
-		return -1, fmt.Errorf("%s is not a valid Jenis", str)
-	}
-}
-
 func (e Jenis) String() string {
-	switch e {
-	case UnknownJenis:
-		return "UnknownJenis"
-	case Barang:
-		return "Barang"
-	case Konstruksi:
-		return "Konstruksi"
-	case Konsultansi:
-		return "Konsultansi"
-	case JasaLainnya:
-		return "JasaLainnya"
-
-	default:
-		panic("Invalid enum Jenis value")
-	}
+	return string(e)
 }
 
 func (e *Jenis) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
-		return fmt.Errorf("enums jenis must be strings")
+		return fmt.Errorf("enums must be strings")
 	}
 
-	var err error
-	*e, err = JenisFrom(str)
-	return err
-
+	*e = Jenis(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Jenis", str)
+	}
+	return nil
 }
 
 func (e Jenis) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-//Kategori represent kategori pengadaan
-type Kategori uint
+type Kategori string
 
 const (
-	UnknownKategori              Kategori = iota // 0
-	KategoriPenyedia                             // 1
-	KategoriSwakelola                            // 2
-	KategoriPenyediaDlmSwakelola                 // 3
+	KategoriPenyedia             Kategori = "Penyedia"
+	KategoriSwakelola            Kategori = "Swakelola"
+	KategoriPenyediaDlmSwakelola Kategori = "PenyediaDlmSwakelola"
 )
+
+var AllKategori = []Kategori{
+	KategoriPenyedia,
+	KategoriSwakelola,
+	KategoriPenyediaDlmSwakelola,
+}
 
 func (e Kategori) IsValid() bool {
 	switch e {
-	case UnknownKategori, KategoriPenyedia, KategoriSwakelola, KategoriPenyediaDlmSwakelola:
+	case KategoriPenyedia, KategoriSwakelola, KategoriPenyediaDlmSwakelola:
 		return true
 	}
 	return false
 }
 
-func KategoriFrom(str string) (Kategori, error) {
-	switch str {
-	case "UnknownKategori":
-		return UnknownKategori, nil
-	case "Penyedia":
-		return KategoriPenyedia, nil
-	case "Swakelola":
-		return KategoriSwakelola, nil
-	case "PenyediaDlmSwakelola":
-		return KategoriPenyediaDlmSwakelola, nil
-
-	default:
-		return 0, fmt.Errorf("%s is not a valid Kategori", str)
-	}
-}
-
 func (e Kategori) String() string {
-	switch e {
-	case UnknownKategori:
-		return "UnknownKategori"
-	case KategoriPenyedia:
-		return "Penyedia"
-	case KategoriSwakelola:
-		return "Swakelola"
-	case KategoriPenyediaDlmSwakelola:
-		return "PenyediaDlmSwakelola"
-
-	default:
-		panic("Invalid enum kategori value")
-	}
+	return string(e)
 }
 
 func (e *Kategori) UnmarshalGQL(v interface{}) error {
 	str, ok := v.(string)
 	if !ok {
-		return fmt.Errorf("enums jenis must be strings")
+		return fmt.Errorf("enums must be strings")
 	}
 
-	var err error
-	*e, err = KategoriFrom(str)
-	return err
+	*e = Kategori(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Kategori", str)
+	}
+	return nil
 }
 
 func (e Kategori) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-//Metode represent metode pengadaan
-type Metode uint
+type Metode string
 
 const (
-	UnknownMetode      Metode = iota // 0
-	PengadaanLangsung                // 1
-	Swakelola                        // 2
-	Tender                           // 3
-	TenderCepat                      // 4
-	Dikecualikan                     // 5
-	EPurchasing                      // 6
-	PenunjukanLangsung               // 7
-	Kontes                           // 8
-	Sayembara                        // 9
-	Seleksi                          // 10
+	MetodeKontes             Metode = "Kontes"
+	MetodeEPurchasing        Metode = "EPurchasing"
+	MetodePengadaanLangsung  Metode = "PengadaanLangsung"
+	MetodePenunjukanLangsung Metode = "PenunjukanLangsung"
+	MetodeSwakelola          Metode = "Swakelola"
+	MetodeSayembara          Metode = "Sayembara"
+	MetodeSeleksi            Metode = "Seleksi"
+	MetodeTender             Metode = "Tender"
+	MetodeTenderCepat        Metode = "TenderCepat"
+	MetodeDikecualikan       Metode = "Dikecualikan"
 )
+
+var AllMetode = []Metode{
+	MetodeKontes,
+	MetodeEPurchasing,
+	MetodePengadaanLangsung,
+	MetodePenunjukanLangsung,
+	MetodeSwakelola,
+	MetodeSayembara,
+	MetodeSeleksi,
+	MetodeTender,
+	MetodeTenderCepat,
+	MetodeDikecualikan,
+}
 
 func (e Metode) IsValid() bool {
 	switch e {
-	case UnknownMetode, PengadaanLangsung, Swakelola, Tender, TenderCepat,
-		Dikecualikan, EPurchasing, PenunjukanLangsung, Kontes, Sayembara,
-		Seleksi:
+	case MetodeKontes, MetodeEPurchasing, MetodePengadaanLangsung, MetodePenunjukanLangsung, MetodeSwakelola, MetodeSayembara, MetodeSeleksi, MetodeTender, MetodeTenderCepat, MetodeDikecualikan:
 		return true
 	}
 	return false
 }
 
-func MetodeFrom(str string) (Metode, error) {
-	switch str {
-	case "UnknownMetode":
-		return UnknownMetode, nil
-	case "PengadaanLangsung":
-		return PengadaanLangsung, nil
-	case "Swakelola":
-		return Swakelola, nil
-	case "Tender":
-		return Tender, nil
-	case "TenderCepat":
-		return TenderCepat, nil
-	case "Dikecualikan":
-		return Dikecualikan, nil
-	case "EPurchasing":
-		return EPurchasing, nil
-	case "PenunjukanLangsung":
-		return PenunjukanLangsung, nil
-	case "Kontes":
-		return Kontes, nil
-	case "Sayembara":
-		return Sayembara, nil
-	case "Seleksi":
-		return Seleksi, nil
-
-	default:
-		return 0, fmt.Errorf("%s is not a valid Metode", str)
-	}
-}
-
 func (e Metode) String() string {
-	switch e {
-	case UnknownMetode:
-		return "UnknownMetode"
-	case PengadaanLangsung:
-		return "PengadaanLangsung"
-	case Swakelola:
-		return "Swakelola"
-	case Tender:
-		return "Tender"
-	case TenderCepat:
-		return "TenderCepat"
-	case Dikecualikan:
-		return "Dikecualikan"
-	case EPurchasing:
-		return "EPurchasing"
-	case PenunjukanLangsung:
-		return "PenunjukanLangsung"
-	case Kontes:
-		return "Kontes"
-	case Sayembara:
-		return "Sayembara"
-	case Seleksi:
-		return "Seleksi"
-
-	default:
-		panic("invalid enum value")
-	}
+	return string(e)
 }
 
 func (e *Metode) UnmarshalGQL(v interface{}) error {
@@ -299,62 +140,43 @@ func (e *Metode) UnmarshalGQL(v interface{}) error {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	var err error
-	*e, err = MetodeFrom(str)
-	return err
+	*e = Metode(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Metode", str)
+	}
+	return nil
 }
 
 func (e Metode) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// State represent state pengadaan in the mean of time
-type State uint
+type State string
 
 const (
-	NotReady   State = iota // 0
-	InProgress              // 1
-	Warning                 // 2
-	Finish                  // 3
+	StateNotReady   State = "NotReady"
+	StateInProgress State = "InProgress"
+	StateWarning    State = "Warning"
+	StateFinish     State = "Finish"
 )
 
-func StateFrom(str string) (State, error) {
-	switch str {
-	case "NotReady":
-		return NotReady, nil
-	case "InProgress":
-		return InProgress, nil
-	case "Warning":
-		return Warning, nil
-	case "Finish":
-		return Finish, nil
-	default:
-		return 0, fmt.Errorf("%s is not a valid Type", str)
-	}
+var AllState = []State{
+	StateNotReady,
+	StateInProgress,
+	StateWarning,
+	StateFinish,
 }
 
 func (e State) IsValid() bool {
 	switch e {
-	case NotReady, InProgress, Warning, Finish:
+	case StateNotReady, StateInProgress, StateWarning, StateFinish:
 		return true
 	}
 	return false
 }
 
 func (e State) String() string {
-	switch e {
-	case NotReady:
-		return "NotReady"
-	case InProgress:
-		return "InProgress"
-	case Warning:
-		return "Warning"
-	case Finish:
-		return "Finish"
-
-	default:
-		panic("invalid enum value")
-	}
+	return string(e)
 }
 
 func (e *State) UnmarshalGQL(v interface{}) error {
@@ -363,16 +185,60 @@ func (e *State) UnmarshalGQL(v interface{}) error {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	var err error
-	*e, err = StateFrom(str)
-	return err
+	*e = State(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid State", str)
+	}
+	return nil
 }
 
 func (e State) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-// Waktu
+type Type string
+
+const (
+	TypeRup    Type = "Rup"
+	TypeOpd    Type = "Opd"
+	TypePacket Type = "Packet"
+)
+
+var AllType = []Type{
+	TypeRup,
+	TypeOpd,
+	TypePacket,
+}
+
+func (e Type) IsValid() bool {
+	switch e {
+	case TypeRup, TypeOpd, TypePacket:
+		return true
+	}
+	return false
+}
+
+func (e Type) String() string {
+	return string(e)
+}
+
+func (e *Type) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = Type(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Type", str)
+	}
+	return nil
+}
+
+func (e Type) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type Waktu interface {
 	IsWaktu()
 }

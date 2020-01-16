@@ -8,11 +8,3 @@ type Planning struct {
 }
 
 func (Planning) IsWaktu() {}
-
-type RencanaWaktu struct {
-	Pemilihan   *Planning `json:"pemilihan"`
-	Pelaksanaan *Planning `json:"pelaksanaan"`
-	Pemanfaatan *Planning `json:"pemanfaatan"`
-}
-
-func (RencanaWaktu) IsWaktu() {}

@@ -1,6 +1,6 @@
 package model
 
-type RupRekapItem struct {
+type OpdItem struct {
 	ID                    string `rethinkdb:"id,omitempty", json:"id,omitempty"`
 	KodeOpd               string `rethinkdb:"kodeOpd", json:"kodeOpd"`
 	NamaOpd               string `rethinkdb:"namaOpd", json:"namaOpd"`

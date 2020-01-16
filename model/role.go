@@ -9,52 +9,30 @@ import (
 // Rolle access
 // A custom enum that uses integers to represent the values in memory
 // but serialize as string for graphql
-type Role uint
+type Role string
 
 const (
-	Guest    Role = iota // 0
-	User                 // 1
-	Admin                // 2
-	Superman             // 3
+	RoleAdmin Role = "Admin"
+	RoleUser  Role = "User"
+	RoleGuest Role = "Guest"
 )
 
-func RoleFrom(str string) (Role, error) {
-	switch str {
-	case "Guest":
-		return Guest, nil
-	case "User":
-		return User, nil
-	case "Admin":
-		return Admin, nil
-	case "Superman":
-		return Superman, nil
-	default:
-		return 0, fmt.Errorf("%s is not a valid Role", str)
-	}
+var AllRole = []Role{
+	RoleAdmin,
+	RoleUser,
+	RoleGuest,
 }
 
 func (e Role) IsValid() bool {
 	switch e {
-	case Guest, User, Admin, Superman:
+	case RoleAdmin, RoleUser, RoleGuest:
 		return true
 	}
 	return false
 }
 
 func (e Role) String() string {
-	switch e {
-	case Guest:
-		return "Guest"
-	case User:
-		return "User"
-	case Admin:
-		return "Admin"
-	case Superman:
-		return "Superman"
-
-	default:
-		panic("invalid enum value")
-	}
+	return string(e)
 }
 
 func (e *Role) UnmarshalGQL(v interface{}) error {
@@ -63,9 +41,11 @@ func (e *Role) UnmarshalGQL(v interface{}) error {
 		return fmt.Errorf("enums must be strings")
 	}
 
-	var err error
-	*e, err = RoleFrom(str)
-	return err
+	*e = Role(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid Role", str)
+	}
+	return nil
 }
 
 func (e Role) MarshalGQL(w io.Writer) {

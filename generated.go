@@ -36,14 +36,31 @@ type Config struct {
 }
 
 type ResolverRoot interface {
+	OpdItem() OpdItemResolver
 	Query() QueryResolver
-	RupRekapItem() RupRekapItemResolver
+	RencanaWaktu() RencanaWaktuResolver
 }
 
 type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	OpdItem struct {
+		ID                    func(childComplexity int) int
+		KodeOpd               func(childComplexity int) int
+		NamaOpd               func(childComplexity int) int
+		NumPaguPenyedia       func(childComplexity int) int
+		NumPaguPenyediaDlmSwa func(childComplexity int) int
+		NumPaguSwakelola      func(childComplexity int) int
+		NumPenyedia           func(childComplexity int) int
+		NumPenyediaDlmSwa     func(childComplexity int) int
+		NumSwakelola          func(childComplexity int) int
+		Rups                  func(childComplexity int) int
+		Tahun                 func(childComplexity int) int
+		TotalPagu             func(childComplexity int) int
+		TotalPaket            func(childComplexity int) int
+	}
+
 	Planning struct {
 		Akhir func(childComplexity int) int
 		Awal  func(childComplexity int) int
@@ -77,31 +94,20 @@ type ComplexityRoot struct {
 		Tahun      func(childComplexity int) int
 		Waktu      func(childComplexity int) int
 	}
-
-	RupRekapItem struct {
-		ID                    func(childComplexity int) int
-		KodeOpd               func(childComplexity int) int
-		NamaOpd               func(childComplexity int) int
-		NumPaguPenyedia       func(childComplexity int) int
-		NumPaguPenyediaDlmSwa func(childComplexity int) int
-		NumPaguSwakelola      func(childComplexity int) int
-		NumPenyedia           func(childComplexity int) int
-		NumPenyediaDlmSwa     func(childComplexity int) int
-		NumSwakelola          func(childComplexity int) int
-		Rups                  func(childComplexity int) int
-		Tahun                 func(childComplexity int) int
-		TotalPagu             func(childComplexity int) int
-		TotalPaket            func(childComplexity int) int
-	}
 }
 
+type OpdItemResolver interface {
+	Rups(ctx context.Context, obj *model.OpdItem) ([]*model.RupItem, error)
+	Tahun(ctx context.Context, obj *model.OpdItem) (string, error)
+}
 type QueryResolver interface {
-	ViewOpd(ctx context.Context, id string) (*model.RupRekapItem, error)
+	ViewOpd(ctx context.Context, id string) (*model.OpdItem, error)
 	ViewRup(ctx context.Context, options *model.RupOptions) ([]*model.RupItem, error)
 }
-type RupRekapItemResolver interface {
-	Rups(ctx context.Context, obj *model.RupRekapItem) ([]*model.RupItem, error)
-	Tahun(ctx context.Context, obj *model.RupRekapItem) (string, error)
+type RencanaWaktuResolver interface {
+	Pemilihan(ctx context.Context, obj *model.RencanaWaktu) (*Planning, error)
+	Pelaksanaan(ctx context.Context, obj *model.RencanaWaktu) (*Planning, error)
+	Pemanfaatan(ctx context.Context, obj *model.RencanaWaktu) (*Planning, error)
 }
 
 type executableSchema struct {
@@ -118,6 +124,97 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "OpdItem.id":
+		if e.complexity.OpdItem.ID == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.ID(childComplexity), true
+
+	case "OpdItem.kodeOpd":
+		if e.complexity.OpdItem.KodeOpd == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.KodeOpd(childComplexity), true
+
+	case "OpdItem.namaOpd":
+		if e.complexity.OpdItem.NamaOpd == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.NamaOpd(childComplexity), true
+
+	case "OpdItem.numPaguPenyedia":
+		if e.complexity.OpdItem.NumPaguPenyedia == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.NumPaguPenyedia(childComplexity), true
+
+	case "OpdItem.numPaguPenyediaDlmSwa":
+		if e.complexity.OpdItem.NumPaguPenyediaDlmSwa == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.NumPaguPenyediaDlmSwa(childComplexity), true
+
+	case "OpdItem.numPaguSwakelola":
+		if e.complexity.OpdItem.NumPaguSwakelola == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.NumPaguSwakelola(childComplexity), true
+
+	case "OpdItem.numPenyedia":
+		if e.complexity.OpdItem.NumPenyedia == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.NumPenyedia(childComplexity), true
+
+	case "OpdItem.numPenyediaDlmSwa":
+		if e.complexity.OpdItem.NumPenyediaDlmSwa == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.NumPenyediaDlmSwa(childComplexity), true
+
+	case "OpdItem.numSwakelola":
+		if e.complexity.OpdItem.NumSwakelola == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.NumSwakelola(childComplexity), true
+
+	case "OpdItem.rups":
+		if e.complexity.OpdItem.Rups == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.Rups(childComplexity), true
+
+	case "OpdItem.tahun":
+		if e.complexity.OpdItem.Tahun == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.Tahun(childComplexity), true
+
+	case "OpdItem.TotalPagu":
+		if e.complexity.OpdItem.TotalPagu == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.TotalPagu(childComplexity), true
+
+	case "OpdItem.totalPaket":
+		if e.complexity.OpdItem.TotalPaket == nil {
+			break
+		}
+
+		return e.complexity.OpdItem.TotalPaket(childComplexity), true
 
 	case "Planning.akhir":
 		if e.complexity.Planning.Akhir == nil {
@@ -283,97 +380,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.RupItem.Waktu(childComplexity), true
 
-	case "RupRekapItem.id":
-		if e.complexity.RupRekapItem.ID == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.ID(childComplexity), true
-
-	case "RupRekapItem.kodeOpd":
-		if e.complexity.RupRekapItem.KodeOpd == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.KodeOpd(childComplexity), true
-
-	case "RupRekapItem.namaOpd":
-		if e.complexity.RupRekapItem.NamaOpd == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.NamaOpd(childComplexity), true
-
-	case "RupRekapItem.numPaguPenyedia":
-		if e.complexity.RupRekapItem.NumPaguPenyedia == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.NumPaguPenyedia(childComplexity), true
-
-	case "RupRekapItem.numPaguPenyediaDlmSwa":
-		if e.complexity.RupRekapItem.NumPaguPenyediaDlmSwa == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.NumPaguPenyediaDlmSwa(childComplexity), true
-
-	case "RupRekapItem.numPaguSwakelola":
-		if e.complexity.RupRekapItem.NumPaguSwakelola == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.NumPaguSwakelola(childComplexity), true
-
-	case "RupRekapItem.numPenyedia":
-		if e.complexity.RupRekapItem.NumPenyedia == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.NumPenyedia(childComplexity), true
-
-	case "RupRekapItem.numPenyediaDlmSwa":
-		if e.complexity.RupRekapItem.NumPenyediaDlmSwa == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.NumPenyediaDlmSwa(childComplexity), true
-
-	case "RupRekapItem.numSwakelola":
-		if e.complexity.RupRekapItem.NumSwakelola == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.NumSwakelola(childComplexity), true
-
-	case "RupRekapItem.rups":
-		if e.complexity.RupRekapItem.Rups == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.Rups(childComplexity), true
-
-	case "RupRekapItem.tahun":
-		if e.complexity.RupRekapItem.Tahun == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.Tahun(childComplexity), true
-
-	case "RupRekapItem.TotalPagu":
-		if e.complexity.RupRekapItem.TotalPagu == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.TotalPagu(childComplexity), true
-
-	case "RupRekapItem.totalPaket":
-		if e.complexity.RupRekapItem.TotalPaket == nil {
-			break
-		}
-
-		return e.complexity.RupRekapItem.TotalPaket(childComplexity), true
-
 	}
 	return 0, false
 }
@@ -434,21 +440,18 @@ enum Role {
 }
 
 enum Type {
-	UnknownType
 	Rup 
 	Opd
 	Packet
 }
 
 enum Kategori {
-	UnknownKategori
-	KategoriPenyedia
-	KategoriSwakelola
-	KategoriPenyediaDlmSwakelola
+	Penyedia
+	Swakelola
+    PenyediaDlmSwakelola
 }
 
 enum Metode  {
-	UnknownMetode
 	Kontes
 	EPurchasing
 	PengadaanLangsung
@@ -469,7 +472,6 @@ enum State {
 }
 
 enum Jenis {
-	UnknownJenis
 	Barang
 	Konstruksi
 	Konsultansi
@@ -494,7 +496,7 @@ type RupItem {
 	detilWaktu: Waktu
 }
 
-type RupRekapItem {
+type OpdItem {
 	id:          			ID!          
 	kodeOpd:     			String!         
 	namaOpd:     			String!         
@@ -533,7 +535,7 @@ input RupOptions {
 }
 
 type Query {
-  viewOpd(id: String!): RupRekapItem!
+  viewOpd(id: String!): OpdItem!
   viewRup(options: RupOptions) : [RupItem]!
 }
 
@@ -621,6 +623,487 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _OpdItem_id(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_kodeOpd(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.KodeOpd, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_namaOpd(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NamaOpd, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_numPenyedia(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumPenyedia, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_numPaguPenyedia(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumPaguPenyedia, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_numSwakelola(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumSwakelola, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_numPaguSwakelola(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumPaguSwakelola, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_numPenyediaDlmSwa(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumPenyediaDlmSwa, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_numPaguPenyediaDlmSwa(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NumPaguPenyediaDlmSwa, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_totalPaket(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalPaket, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_TotalPagu(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: false,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TotalPagu, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_rups(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.OpdItem().Rups(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*model.RupItem)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNRupItem2ᚕᚖpicolloᚋmodelᚐRupItem(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _OpdItem_tahun(ctx context.Context, field graphql.CollectedField, obj *model.OpdItem) (ret graphql.Marshaler) {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+		ec.Tracer.EndFieldExecution(ctx)
+	}()
+	rctx := &graphql.ResolverContext{
+		Object:   "OpdItem",
+		Field:    field,
+		Args:     nil,
+		IsMethod: true,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.OpdItem().Tahun(rctx, obj)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
 
 func (ec *executionContext) _Planning_awal(ctx context.Context, field graphql.CollectedField, obj *Planning) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
@@ -728,10 +1211,10 @@ func (ec *executionContext) _Query_viewOpd(ctx context.Context, field graphql.Co
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.RupRekapItem)
+	res := resTmp.(*model.OpdItem)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRupRekapItem2ᚖpicolloᚋmodelᚐRupRekapItem(ctx, field.Selections, res)
+	return ec.marshalNOpdItem2ᚖpicolloᚋmodelᚐOpdItem(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_viewRup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -853,7 +1336,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RencanaWaktu_pemilihan(ctx context.Context, field graphql.CollectedField, obj *RencanaWaktu) (ret graphql.Marshaler) {
+func (ec *executionContext) _RencanaWaktu_pemilihan(ctx context.Context, field graphql.CollectedField, obj *model.RencanaWaktu) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -866,13 +1349,13 @@ func (ec *executionContext) _RencanaWaktu_pemilihan(ctx context.Context, field g
 		Object:   "RencanaWaktu",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Pemilihan, nil
+		return ec.resolvers.RencanaWaktu().Pemilihan(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -887,7 +1370,7 @@ func (ec *executionContext) _RencanaWaktu_pemilihan(ctx context.Context, field g
 	return ec.marshalOPlanning2ᚖpicolloᚐPlanning(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RencanaWaktu_pelaksanaan(ctx context.Context, field graphql.CollectedField, obj *RencanaWaktu) (ret graphql.Marshaler) {
+func (ec *executionContext) _RencanaWaktu_pelaksanaan(ctx context.Context, field graphql.CollectedField, obj *model.RencanaWaktu) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -900,13 +1383,13 @@ func (ec *executionContext) _RencanaWaktu_pelaksanaan(ctx context.Context, field
 		Object:   "RencanaWaktu",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Pelaksanaan, nil
+		return ec.resolvers.RencanaWaktu().Pelaksanaan(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -921,7 +1404,7 @@ func (ec *executionContext) _RencanaWaktu_pelaksanaan(ctx context.Context, field
 	return ec.marshalOPlanning2ᚖpicolloᚐPlanning(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RencanaWaktu_pemanfaatan(ctx context.Context, field graphql.CollectedField, obj *RencanaWaktu) (ret graphql.Marshaler) {
+func (ec *executionContext) _RencanaWaktu_pemanfaatan(ctx context.Context, field graphql.CollectedField, obj *model.RencanaWaktu) (ret graphql.Marshaler) {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() {
 		if r := recover(); r != nil {
@@ -934,13 +1417,13 @@ func (ec *executionContext) _RencanaWaktu_pemanfaatan(ctx context.Context, field
 		Object:   "RencanaWaktu",
 		Field:    field,
 		Args:     nil,
-		IsMethod: false,
+		IsMethod: true,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Pemanfaatan, nil
+		return ec.resolvers.RencanaWaktu().Pemanfaatan(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1496,487 +1979,6 @@ func (ec *executionContext) _RupItem_detilWaktu(ctx context.Context, field graph
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return ec.marshalOWaktu2picolloᚋmodelᚐWaktu(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_id(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_kodeOpd(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.KodeOpd, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_namaOpd(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.NamaOpd, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_numPenyedia(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.NumPenyedia, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_numPaguPenyedia(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.NumPaguPenyedia, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_numSwakelola(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.NumSwakelola, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_numPaguSwakelola(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.NumPaguSwakelola, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_numPenyediaDlmSwa(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.NumPenyediaDlmSwa, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_numPaguPenyediaDlmSwa(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.NumPaguPenyediaDlmSwa, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_totalPaket(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalPaket, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_TotalPagu(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: false,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TotalPagu, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_rups(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.RupRekapItem().Rups(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*model.RupItem)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNRupItem2ᚕᚖpicolloᚋmodelᚐRupItem(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RupRekapItem_tahun(ctx context.Context, field graphql.CollectedField, obj *model.RupRekapItem) (ret graphql.Marshaler) {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-		ec.Tracer.EndFieldExecution(ctx)
-	}()
-	rctx := &graphql.ResolverContext{
-		Object:   "RupRekapItem",
-		Field:    field,
-		Args:     nil,
-		IsMethod: true,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.RupRekapItem().Tahun(rctx, obj)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3190,9 +3192,9 @@ func (ec *executionContext) _Waktu(ctx context.Context, sel ast.SelectionSet, ob
 		return ec._Planning(ctx, sel, &obj)
 	case *Planning:
 		return ec._Planning(ctx, sel, obj)
-	case RencanaWaktu:
+	case model.RencanaWaktu:
 		return ec._RencanaWaktu(ctx, sel, &obj)
-	case *RencanaWaktu:
+	case *model.RencanaWaktu:
 		return ec._RencanaWaktu(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
@@ -3202,6 +3204,111 @@ func (ec *executionContext) _Waktu(ctx context.Context, sel ast.SelectionSet, ob
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var opdItemImplementors = []string{"OpdItem"}
+
+func (ec *executionContext) _OpdItem(ctx context.Context, sel ast.SelectionSet, obj *model.OpdItem) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.RequestContext, sel, opdItemImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("OpdItem")
+		case "id":
+			out.Values[i] = ec._OpdItem_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "kodeOpd":
+			out.Values[i] = ec._OpdItem_kodeOpd(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "namaOpd":
+			out.Values[i] = ec._OpdItem_namaOpd(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "numPenyedia":
+			out.Values[i] = ec._OpdItem_numPenyedia(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "numPaguPenyedia":
+			out.Values[i] = ec._OpdItem_numPaguPenyedia(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "numSwakelola":
+			out.Values[i] = ec._OpdItem_numSwakelola(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "numPaguSwakelola":
+			out.Values[i] = ec._OpdItem_numPaguSwakelola(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "numPenyediaDlmSwa":
+			out.Values[i] = ec._OpdItem_numPenyediaDlmSwa(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "numPaguPenyediaDlmSwa":
+			out.Values[i] = ec._OpdItem_numPaguPenyediaDlmSwa(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "totalPaket":
+			out.Values[i] = ec._OpdItem_totalPaket(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "TotalPagu":
+			out.Values[i] = ec._OpdItem_TotalPagu(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&invalids, 1)
+			}
+		case "rups":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._OpdItem_rups(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		case "tahun":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._OpdItem_tahun(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
 
 var planningImplementors = []string{"Planning", "Waktu"}
 
@@ -3289,7 +3396,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var rencanaWaktuImplementors = []string{"RencanaWaktu", "Waktu"}
 
-func (ec *executionContext) _RencanaWaktu(ctx context.Context, sel ast.SelectionSet, obj *RencanaWaktu) graphql.Marshaler {
+func (ec *executionContext) _RencanaWaktu(ctx context.Context, sel ast.SelectionSet, obj *model.RencanaWaktu) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.RequestContext, sel, rencanaWaktuImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -3299,11 +3406,38 @@ func (ec *executionContext) _RencanaWaktu(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("RencanaWaktu")
 		case "pemilihan":
-			out.Values[i] = ec._RencanaWaktu_pemilihan(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RencanaWaktu_pemilihan(ctx, field, obj)
+				return res
+			})
 		case "pelaksanaan":
-			out.Values[i] = ec._RencanaWaktu_pelaksanaan(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RencanaWaktu_pelaksanaan(ctx, field, obj)
+				return res
+			})
 		case "pemanfaatan":
-			out.Values[i] = ec._RencanaWaktu_pemanfaatan(ctx, field, obj)
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._RencanaWaktu_pemanfaatan(ctx, field, obj)
+				return res
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3389,111 +3523,6 @@ func (ec *executionContext) _RupItem(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = ec._RupItem_jenis(ctx, field, obj)
 		case "detilWaktu":
 			out.Values[i] = ec._RupItem_detilWaktu(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var rupRekapItemImplementors = []string{"RupRekapItem"}
-
-func (ec *executionContext) _RupRekapItem(ctx context.Context, sel ast.SelectionSet, obj *model.RupRekapItem) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.RequestContext, sel, rupRekapItemImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RupRekapItem")
-		case "id":
-			out.Values[i] = ec._RupRekapItem_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "kodeOpd":
-			out.Values[i] = ec._RupRekapItem_kodeOpd(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "namaOpd":
-			out.Values[i] = ec._RupRekapItem_namaOpd(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "numPenyedia":
-			out.Values[i] = ec._RupRekapItem_numPenyedia(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "numPaguPenyedia":
-			out.Values[i] = ec._RupRekapItem_numPaguPenyedia(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "numSwakelola":
-			out.Values[i] = ec._RupRekapItem_numSwakelola(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "numPaguSwakelola":
-			out.Values[i] = ec._RupRekapItem_numPaguSwakelola(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "numPenyediaDlmSwa":
-			out.Values[i] = ec._RupRekapItem_numPenyediaDlmSwa(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "numPaguPenyediaDlmSwa":
-			out.Values[i] = ec._RupRekapItem_numPaguPenyediaDlmSwa(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "totalPaket":
-			out.Values[i] = ec._RupRekapItem_totalPaket(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "TotalPagu":
-			out.Values[i] = ec._RupRekapItem_TotalPagu(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&invalids, 1)
-			}
-		case "rups":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._RupRekapItem_rups(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
-		case "tahun":
-			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._RupRekapItem_tahun(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&invalids, 1)
-				}
-				return res
-			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3810,6 +3839,20 @@ func (ec *executionContext) marshalNMetode2picolloᚋmodelᚐMetode(ctx context.
 	return v
 }
 
+func (ec *executionContext) marshalNOpdItem2picolloᚋmodelᚐOpdItem(ctx context.Context, sel ast.SelectionSet, v model.OpdItem) graphql.Marshaler {
+	return ec._OpdItem(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNOpdItem2ᚖpicolloᚋmodelᚐOpdItem(ctx context.Context, sel ast.SelectionSet, v *model.OpdItem) graphql.Marshaler {
+	if v == nil {
+		if !ec.HasError(graphql.GetResolverContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._OpdItem(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNRupItem2ᚕᚖpicolloᚋmodelᚐRupItem(ctx context.Context, sel ast.SelectionSet, v []*model.RupItem) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
@@ -3845,20 +3888,6 @@ func (ec *executionContext) marshalNRupItem2ᚕᚖpicolloᚋmodelᚐRupItem(ctx 
 	}
 	wg.Wait()
 	return ret
-}
-
-func (ec *executionContext) marshalNRupRekapItem2picolloᚋmodelᚐRupRekapItem(ctx context.Context, sel ast.SelectionSet, v model.RupRekapItem) graphql.Marshaler {
-	return ec._RupRekapItem(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNRupRekapItem2ᚖpicolloᚋmodelᚐRupRekapItem(ctx context.Context, sel ast.SelectionSet, v *model.RupRekapItem) graphql.Marshaler {
-	if v == nil {
-		if !ec.HasError(graphql.GetResolverContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._RupRekapItem(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

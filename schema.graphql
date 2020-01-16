@@ -9,21 +9,18 @@ enum Role {
 }
 
 enum Type {
-	UnknownType
 	Rup 
 	Opd
 	Packet
 }
 
 enum Kategori {
-	UnknownKategori
-	KategoriPenyedia
-	KategoriSwakelola
-	KategoriPenyediaDlmSwakelola
+	Penyedia
+	Swakelola
+    PenyediaDlmSwakelola
 }
 
 enum Metode  {
-	UnknownMetode
 	Kontes
 	EPurchasing
 	PengadaanLangsung
@@ -44,7 +41,6 @@ enum State {
 }
 
 enum Jenis {
-	UnknownJenis
 	Barang
 	Konstruksi
 	Konsultansi
@@ -69,7 +65,7 @@ type RupItem {
 	detilWaktu: Waktu
 }
 
-type RupRekapItem {
+type OpdItem {
 	id:          			ID!          
 	kodeOpd:     			String!         
 	namaOpd:     			String!         
@@ -108,7 +104,7 @@ input RupOptions {
 }
 
 type Query {
-  viewOpd(id: String!): RupRekapItem!
+  viewOpd(id: String!): OpdItem!
   viewRup(options: RupOptions) : [RupItem]!
 }
 

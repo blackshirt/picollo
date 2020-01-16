@@ -15,8 +15,8 @@ resolver:
 autobind: []
 
 models:
- RupRekapItem:
-   model: picollo/model.RupRekapItem
+ OpdItem:
+   model: picollo/model.OpdItem
    fields:
      rups:
        resolver: true
@@ -28,6 +28,8 @@ models:
   
  Waktu:
    model: picollo/model.Waktu
+ RencanaWaktu:
+   model: picollo/model.RencanaWaktu
  State:
    model: picollo/model.State
  Jenis:
