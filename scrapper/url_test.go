@@ -12,8 +12,8 @@ func TestInit(t *testing.T) {
 		input string
 		want  string
 	}{
-		{"tahun", "", "2019"},
-		{"tahun 2", "2019", "2019"},
+		{"tahun", "", "2020"},
+		{"tahun 2", "2020", "2020"},
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%s", tc.name), func(t *testing.T) {
@@ -33,7 +33,7 @@ func TestTahun(t *testing.T) {
 		input string
 		want  string
 	}{
-		{"empty tahun", "", "2019"},
+		{"empty tahun", "", "2020"},
 		{"tahun 1", "2019", "2019"},
 		{"tahun 2", "2020", "2020"},
 	}
