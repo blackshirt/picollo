@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 
 	"picollo/model"
 
@@ -12,24 +13,37 @@ import (
 )
 
 type Storager interface {
+	// what type the Storager provides
 	AvailableType() ([]model.Type, error)
+
+	// Load load the model with type t and keyy ke  from underlying backend implementation
 	Load(ctx context.Context, t model.Type, key string) (*Result, error)
+
+	// Save saving the obj data to the backend implementation
 	Save(ctx context.Context, obj interface{}) error
+
+	// Exists check whether model with tipe t and key key was there in backend
 	Exists(ctx context.Context, t model.Type, key string) bool
+
+	// All return all model data available in the backend
 	All(ctx context.Context, t model.Type) (*Result, error)
 }
 
+// Result of the operation
 type Result struct {
+	// tipe the result provided
 	Tipe model.Type
+	// underlying data
 	Data interface{}
 }
 
+// rethinkdb Storager implementation
 type rdbStore struct {
 	sess *r.Session   // rethinkdb session
 	avt  []model.Type // availablye type
 }
 
-var defaultAvt []model.Type = []model.Type{model.TypeRup, model.TypeOpd, model.TypePacket}
+var defaultAvt []model.Type = model.AllType
 
 // NewRdbStore creates RethinkDB storage
 func NewRdbStore(s *r.Session, avt []model.Type) Storager {
@@ -41,13 +55,8 @@ func NewRdbStore(s *r.Session, avt []model.Type) Storager {
 		avt:  avt,
 	}
 }
-func (s rdbStore) hasEmptyAvT() bool {
-	if s.avt == nil || len(s.avt) == 0 {
-		return true
-	}
-	return false
-}
 
+// AvailableType implement AvailableType interface method of Storager
 func (s rdbStore) AvailableType() ([]model.Type, error) {
 	if s.hasEmptyAvT() {
 		return nil, errors.New("has no AvT")
@@ -55,6 +64,88 @@ func (s rdbStore) AvailableType() ([]model.Type, error) {
 	return s.avt, nil
 }
 
+// Load implement the Load method of the Storager interface, load single item
+// based on tipe `t` and id `key`
+func (s rdbStore) Load(ctx context.Context, t model.Type, key string) (*Result, error) {
+	// check if tipe `t` was valid tipe and available in the store
+	if !s.containsType(t) && !t.IsValid() {
+		return nil, errors.New("your tipe was not in store")
+	}
+
+	// run the get query
+	cur, err := r.Table(t.String()).Get(key).Run(s.sess, r.RunOpts{Context: ctx})
+	if err != nil {
+		return nil, err
+	}
+	res, err := loadItem(cur, t, key)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+// All return all item based on tipe `t`
+func (s rdbStore) All(ctx context.Context, t model.Type) (*Result, error) {
+	if !s.containsType(t) && !t.IsValid() {
+		return nil, errors.New("your tipe was not in store")
+	}
+	cur, err := r.Table(t.String()).Run(s.sess, r.RunOpts{Context: ctx})
+	if err != nil {
+		return nil, err
+	}
+	res, err := allItem(cur, t)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
+
+// Exists check whether item tipe `t` and id `key` was exist in the store
+func (s rdbStore) Exists(ctx context.Context, t model.Type, key string) bool {
+	if !s.containsType(t) && !t.IsValid() {
+		return false
+	}
+	_, err := r.Table(t.String()).GetAll(key).Count().Eq(1).Run(s.sess, r.RunOpts{Context: ctx})
+	if err == nil {
+		return true
+	}
+
+	return false
+}
+
+// Save saving the object `obj` to the backend storage
+func (s rdbStore) Save(ctx context.Context, obj interface{}) error {
+	switch obj.(type) {
+	case *model.RupItem, []*model.RupItem:
+		tbl := model.TypeRup.String()
+		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
+
+		return err
+	case *model.OpdItem, []*model.OpdItem:
+		tbl := model.TypeOpd.String()
+		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
+
+		return err
+	case *model.PacketItem, []*model.PacketItem:
+		tbl := model.TypePacket.String()
+		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
+
+		return err
+	default:
+		return errors.New("unknown obj to insert")
+	}
+}
+
+// hasEmptyAvT check whether the storage has available tipe
+func (s rdbStore) hasEmptyAvT() bool {
+	if s.avt == nil || len(s.avt) == 0 {
+		return true
+	}
+	return false
+}
+
+// containsType check the store contains tipe `t`
 func (s rdbStore) containsType(t model.Type) bool {
 	if s.hasEmptyAvT() {
 		return false
@@ -67,6 +158,7 @@ func (s rdbStore) containsType(t model.Type) bool {
 	return false
 }
 
+// loadRup load single rupitem with id `key` using provided rethinkdb cursor `c`
 func loadRup(c *r.Cursor, key string) (*model.RupItem, error) {
 	if c == nil {
 		return nil, errors.New("No cursor provided")
@@ -79,6 +171,7 @@ func loadRup(c *r.Cursor, key string) (*model.RupItem, error) {
 
 }
 
+// allRup load all rupitem with using provided rethinkdb cursor c
 func allRup(c *r.Cursor) ([]model.RupItem, error) {
 	if c == nil {
 		return nil, errors.New("No cursor provided")
@@ -91,6 +184,7 @@ func allRup(c *r.Cursor) ([]model.RupItem, error) {
 
 }
 
+// loadOpd load single opditem with id key using provided rethinkdb cursor c
 func loadOpd(c *r.Cursor, key string) (*model.OpdItem, error) {
 	if c == nil {
 		return nil, errors.New("No cursor provided")
@@ -103,6 +197,7 @@ func loadOpd(c *r.Cursor, key string) (*model.OpdItem, error) {
 
 }
 
+// allOpd load all opditem using provided rethinkdb cursor `c`
 func allOpd(c *r.Cursor) ([]model.OpdItem, error) {
 	if c == nil {
 		return nil, errors.New("No cursor provided")
@@ -115,6 +210,7 @@ func allOpd(c *r.Cursor) ([]model.OpdItem, error) {
 
 }
 
+// loadPacket load single packetitem with id `key` using provided rethinkdb cursor `c`
 func loadPacket(c *r.Cursor, key string) (*model.PacketItem, error) {
 	if c == nil {
 		return nil, errors.New("No cursor provided")
@@ -127,6 +223,7 @@ func loadPacket(c *r.Cursor, key string) (*model.PacketItem, error) {
 
 }
 
+// allPacket load all packetitem using provided rethinkdb cursor `c`
 func allPacket(c *r.Cursor) ([]model.PacketItem, error) {
 	if c == nil {
 		return nil, errors.New("No cursor provided")
@@ -140,6 +237,8 @@ func allPacket(c *r.Cursor) ([]model.PacketItem, error) {
 	return pcks, nil
 }
 
+// loadItem load single specific item based on tipe `t` and id `key` using
+// provided rethinkdb Cursor `c`
 func loadItem(c *r.Cursor, t model.Type, key string) (*Result, error) {
 	if !t.IsValid() {
 		return nil, errors.New("errors tipe was not valid")
@@ -168,6 +267,7 @@ func loadItem(c *r.Cursor, t model.Type, key string) (*Result, error) {
 	return res, nil
 }
 
+// allItem load all item with specific tipe `t` using provided rethinkdb cursor `c`
 func allItem(c *r.Cursor, t model.Type) (*Result, error) {
 	if !t.IsValid() {
 		return nil, errors.New("errors tipe was not valid")
@@ -201,70 +301,29 @@ func allItem(c *r.Cursor, t model.Type) (*Result, error) {
 	return res, nil
 }
 
-func (s rdbStore) Load(ctx context.Context, t model.Type, key string) (*Result, error) {
-	if !s.containsType(t) && !t.IsValid() {
-		return nil, errors.New("your tipe was not in store")
-	}
-
-	cur, err := r.Table(t.String()).Get(key).Run(s.sess, r.RunOpts{Context: ctx})
-	if err != nil {
-		return nil, err
-	}
-	res, err := loadItem(cur, t, key)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+///////////////////////////////////
+// Service related definition /////
+///////////////////////////////////
+type Service interface {
 }
 
-func (s rdbStore) All(ctx context.Context, t model.Type) (*Result, error) {
-	if !s.containsType(t) && !t.IsValid() {
-		return nil, errors.New("your tipe was not in store")
-	}
-	cur, err := r.Table(t.String()).Run(s.sess, r.RunOpts{Context: ctx})
-	if err != nil {
-		return nil, err
-	}
-	res, err := allItem(cur, t)
-	if err != nil {
-		return nil, err
-	}
+type serviceManager struct {
+	store *Storager
 
-	return res, nil
+	l   sync.RWMutex
+	avS map[string]interface{}
 }
 
-func (s rdbStore) Exists(ctx context.Context, t model.Type, key string) bool {
-	if !s.containsType(t) && !t.IsValid() {
-		return false
-	}
-	_, err := r.Table(t.String()).GetAll(key).Count().Eq(1).Run(s.sess, r.RunOpts{Context: ctx})
-	if err == nil {
-		return true
-	}
-
-	return false
+type RupService interface {
+	Get(ctx context.Context, key string) (model.RupItem, error)
+	GetAll(ctx context.Context) ([]model.RupItem, error)
+	FilteredRup(ctx context.Context, cond model.RupFilter) ([]model.RupItem, error)
+	Stats(obj []model.RupItem, cond model.RupFilter) (*StatResults, error)
 }
 
-func (s rdbStore) Save(ctx context.Context, obj interface{}) error {
-	switch obj.(type) {
-	case *model.RupItem, []*model.RupItem:
-		tbl := model.TypeRup.String()
-		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
-
-		return err
-	case *model.OpdItem, []*model.OpdItem:
-		tbl := model.TypeOpd.String()
-		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
-
-		return err
-	case *model.PacketItem, []*model.PacketItem:
-		tbl := model.TypePacket.String()
-		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
-
-		return err
-	default:
-		return errors.New("unknown obj to insert")
-	}
+type StatResults struct {
+	Obj    []interface{} // data he operates om
+	Length int           // length of the data
 }
 
 func main() {

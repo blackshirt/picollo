@@ -43,20 +43,20 @@ func NewLinkBuilder(options ...LinkOption) *linkBuilder {
 	return b
 }
 
-func WithRekap(flag bool) LinkOption {
+func UseRekap(flag bool) LinkOption {
 	return func(b *linkBuilder) {
 		b.useRekap = flag
 	}
 }
 
-func WithRupOption(o model.RupOptions) LinkOption {
+func UseRupOption(o model.RupOptions) LinkOption {
 	return func(b *linkBuilder) {
 		b.opt = &o
 	}
 }
 
 // Year set year used to fetch, default to current year
-func WithTahun(y string) LinkOption {
+func UseTahun(y string) LinkOption {
 	return func(b *linkBuilder) {
 		if y == "" {
 			y = strconv.Itoa(time.Now().Year())
@@ -65,7 +65,7 @@ func WithTahun(y string) LinkOption {
 	}
 }
 
-func WithKodeOpd(idSatker string) LinkOption {
+func UseKodeOpd(idSatker string) LinkOption {
 	return func(b *linkBuilder) {
 		if idSatker == "" {
 			idSatker = "wr0n9c0d3"
@@ -74,7 +74,7 @@ func WithKodeOpd(idSatker string) LinkOption {
 	}
 }
 
-func WithCategory(m model.Kategori) LinkOption {
+func UseCategory(m model.Kategori) LinkOption {
 	return func(b *linkBuilder) {
 		b.opt.Kategori = m
 	}
@@ -84,7 +84,7 @@ func WithCategory(m model.Kategori) LinkOption {
 func (b *linkBuilder) Init() {
 	// b.Tahun = strconv.Itoa(time.Now().Year())
 	if b.opt == nil {
-		opt := new(model.RupOptions)
+		opt := &model.RupOptions{}
 		opt.Tahun = strconv.Itoa(time.Now().Year()) // set to current year
 		b.opt = opt
 	}
@@ -161,7 +161,7 @@ func opdPath(cat model.Kategori) (*url.URL, error) {
 	return nil, errors.New("invalid categori")
 }
 
-//add path string to baseUrl percategory to reconstruct url
+//add path string to baseUrl percategory to construct url
 func addPath(baseUrl, path string) *url.URL {
 	u, err := url.Parse(baseUrl)
 	if err != nil {

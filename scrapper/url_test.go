@@ -39,7 +39,7 @@ func TestTahun(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%s", tc.name), func(t *testing.T) {
-			b := NewLinkBuilder(WithTahun(tc.input))
+			b := NewLinkBuilder(UseTahun(tc.input))
 			got := b.opt.Tahun
 			if got != tc.want {
 				t.Errorf("Tahun builder was incorrect, got: %s, want: %s.", got, tc.want)
@@ -59,7 +59,7 @@ func TestWithCategory(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%s:", tc.input), func(t *testing.T) {
-			b := NewLinkBuilder(WithCategory(tc.input))
+			b := NewLinkBuilder(UseCategory(tc.input))
 
 			if got := b.opt.Kategori; got != tc.want {
 				t.Errorf("got %s; want %s", got, tc.want)
@@ -86,9 +86,9 @@ func TestLinkBuilderUsingRekapLink(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%s:", tc.name), func(t *testing.T) {
 			b := NewLinkBuilder(
-				WithCategory(tc.category),
-				WithRekap(tc.useRekap),
-				WithTahun(tc.tahun))
+				UseCategory(tc.category),
+				UseRekap(tc.useRekap),
+				UseTahun(tc.tahun))
 			link, _ := b.buildPath()
 			got := link.String()
 			if got != tc.want {
@@ -117,9 +117,9 @@ func TestLinkBuilderUsingOpdLink(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(fmt.Sprintf("%s:", tc.name), func(t *testing.T) {
 			b := NewLinkBuilder(
-				WithCategory(tc.category),
-				WithTahun(tc.tahun),
-				WithKodeOpd(tc.opdKode))
+				UseCategory(tc.category),
+				UseTahun(tc.tahun),
+				UseKodeOpd(tc.opdKode))
 			link, _ := b.buildPath()
 			got := link.String()
 			if got != tc.want {

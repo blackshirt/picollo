@@ -4,6 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"strconv"
+	"time"
 )
 
 type RupResponse struct {
@@ -37,6 +39,70 @@ type RupOptions struct {
 	Metode   *Metode  `json:"metode"`
 	State    *State   `json:"state"`
 	Jenis    *Jenis   `json:"jenis"`
+}
+
+type RupFilter func(*RupOptions)
+
+func NewFilter(opts ...RupFilter) *RupOptions {
+	opt := &RupOptions{}
+	opt.Init()
+
+	for _, set := range opts {
+		set(opt)
+	}
+
+	return opt
+}
+
+func (b *RupOptions) Init() {
+	// b.Tahun = strconv.Itoa(time.Now().Year())
+	if b.Tahun == "" {
+		b.Tahun = strconv.Itoa(time.Now().Year()) // set to current year
+	}
+}
+
+func UseKodeOpd(kode string) RupFilter {
+	return func(o *RupOptions) {
+		o.KodeOpd = kode
+	}
+}
+
+func UseKategori(c Kategori) RupFilter {
+	return func(o *RupOptions) {
+		if c.IsValid() {
+			o.Kategori = c
+		}
+	}
+}
+
+func UseTahun(y string) RupFilter {
+	return func(o *RupOptions) {
+		o.Tahun = y
+	}
+}
+
+func UseMetode(m Metode) RupFilter {
+	return func(o *RupOptions) {
+		if m.IsValid() {
+			o.Metode = &m
+		}
+	}
+}
+
+func UseState(s State) RupFilter {
+	return func(o *RupOptions) {
+		if s.IsValid() {
+			o.State = &s
+		}
+	}
+}
+
+func UseJenis(j Jenis) RupFilter {
+	return func(o *RupOptions) {
+		if j.IsValid() {
+			o.Jenis = &j
+		}
+	}
 }
 
 // // SHA256 checksum of the data

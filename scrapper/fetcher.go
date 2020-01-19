@@ -79,7 +79,7 @@ func (f *collyScrapper) decode(b *Results) (*rupResponse, error) {
 
 // Fetch rup with spesific option and return response
 func (f *collyScrapper) fetchRup(opt model.RupOptions) (*rupResponse, error) {
-	b := NewLinkBuilder(WithRupOption(opt))
+	b := NewLinkBuilder(UseRupOption(opt))
 	link, err := b.buildPath()
 	if err != nil {
 		log.Fatal(err)
@@ -96,8 +96,8 @@ func (f *collyScrapper) fetchRup(opt model.RupOptions) (*rupResponse, error) {
 // Fetch rekap rup with spesific option and return response
 func (f *collyScrapper) fetchRekap(opt model.RupOptions) (*rupResponse, error) {
 	b := NewLinkBuilder(
-		WithRupOption(opt),
-		WithRekap(true),
+		UseRupOption(opt),
+		UseRekap(true),
 	)
 	link, err := b.buildPath()
 	if err != nil {
