@@ -11,7 +11,7 @@ import (
 
 var (
 	// base link
-	baseUrlRUP string = "https://sirup.lkpp.go.id/sirup/datatablectr/"
+	rupBaseUrl string = "https://sirup.lkpp.go.id/sirup/datatablectr/"
 	//peropd path
 	pathOpdPenyedia             string = "dataruppenyediasatker"
 	pathOpdSwakelola            string = "datarupswakelolasatker"
@@ -23,6 +23,64 @@ var (
 	//path rekap
 	pathRekap string = "datatableruprekapkldi"
 )
+
+var (
+	lpseBaseUrl string = "https://lpse.kebumenkab.go.id/eproc4/dt/"
+	pathLelang  string = "lelang"
+	pathPeel    string = "pl"
+)
+
+func getBaseUrl(t model.Type) string {
+	var baseUrl string
+	switch t {
+	case model.TypeRup, model.TypeOpd:
+		baseUrl = rupBaseUrl
+	case model.TypePacket:
+		baseUrl = lpseBaseUrl
+	default:
+		baseUrl = ""
+	}
+	return baseUrl
+}
+
+type rupQs struct {
+	useRekapLink bool
+	kategori     model.Kategori
+	year         string
+	idSatker     string
+	idKldi       string
+}
+
+func (rq *rupQs) perKategoriPath() (string, error) {
+	var path string
+	switch rq.useRekapLink {
+	case true:
+		path = fullPath(rq.kategori)
+	case false:
+		path = opdPath(rq.kategori)
+	}
+}
+
+type lpseQs struct {
+	rkn_nama  string
+	kategori  string
+	authToken string
+}
+
+type urlBuilder struct {
+	tipe       model.Type
+	baseUrl    string
+	rupFilter  *rupQs
+	lpseFilter *lpseQs
+}
+
+func (ub *urlBuilder) baseUrl() (string, error) {
+	baseUrl := getBaseUrl(ub.tipe)
+	if baseUrl == "" {
+		return "", errors.New("empty baseUrl result")
+	}
+	return baseUrl, nil
+}
 
 type linkBuilder struct {
 	useRekap bool
@@ -129,11 +187,11 @@ func fullPath(cat model.Kategori) (*url.URL, error) {
 	if cat.IsValid() {
 		switch cat {
 		case model.KategoriPenyedia:
-			link = addPath(baseUrlRUP, pathFullPenyedia)
+			link = addPath(rupBaseUrl, pathFullPenyedia)
 		case model.KategoriSwakelola:
-			link = addPath(baseUrlRUP, pathFullSwakelola)
+			link = addPath(rupBaseUrl, pathFullSwakelola)
 		case model.KategoriPenyediaDlmSwakelola:
-			link = addPath(baseUrlRUP, pathFullPenyediaDlmSwakelola)
+			link = addPath(rupBaseUrl, pathFullPenyediaDlmSwakelola)
 		default:
 			return nil, errors.New("Not valid full link")
 		}
@@ -148,11 +206,11 @@ func opdPath(cat model.Kategori) (*url.URL, error) {
 	if cat.IsValid() {
 		switch cat {
 		case model.KategoriPenyedia:
-			link = addPath(baseUrlRUP, pathOpdPenyedia)
+			link = addPath(rupBaseUrl, pathOpdPenyedia)
 		case model.KategoriSwakelola:
-			link = addPath(baseUrlRUP, pathOpdSwakelola)
+			link = addPath(rupBaseUrl, pathOpdSwakelola)
 		case model.KategoriPenyediaDlmSwakelola:
-			link = addPath(baseUrlRUP, pathOpdPenyediaDlmSwakelola)
+			link = addPath(rupBaseUrl, pathOpdPenyediaDlmSwakelola)
 		default:
 			return nil, errors.New("Not valid opd link")
 		}
