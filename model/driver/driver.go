@@ -16,7 +16,7 @@ type Storager interface {
 	// what type the Storager provides
 	AvailableType() ([]model.Type, error)
 
-	// Load load the model with type t and keyy ke  from underlying backend implementation
+	// Load load the model with type t and key ke  from underlying backend implementation
 	Load(ctx context.Context, t model.Type, key string) (*Result, error)
 
 	// Save saving the obj data to the backend implementation

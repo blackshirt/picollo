@@ -25,9 +25,9 @@ var (
 )
 
 var (
-	lpseBaseUrl string = "https://lpse.kebumenkab.go.id/eproc4/dt/"
-	pathLelang  string = "lelang"
-	pathPeel    string = "pl"
+	lpseBaseUrl    string = "https://lpse.kebumenkab.go.id/eproc4/dt/"
+	lpsePathLelang string = "lelang"
+	lpsePathPeel   string = "pl"
 )
 
 func getBaseUrl(t model.Type) string {
@@ -51,25 +51,91 @@ type rupQs struct {
 	idKldi       string
 }
 
-func (rq *rupQs) perKategoriPath() (string, error) {
-	var path string
+func (rq *rupQs) perKategoriPath() (*url.URL, error) {
+	var path *url.URL
 	switch rq.useRekapLink {
 	case true:
-		path = fullPath(rq.kategori)
+		u, err := fullPath(rq.kategori)
+		if err != nil {
+			return nil, err
+		}
+		path = u
 	case false:
-		path = opdPath(rq.kategori)
+		u, err := opdPath(rq.kategori)
+		if err != nil {
+			return nil, err
+		}
+		path = u
 	}
+	return path, nil
+}
+
+func (rq *rupQs) buildRupUrl() (*url.URL, error) {
+	path, err := rq.perKategoriPath()
+	if err != nil {
+		return nil, err
+	}
+
+	if rq.year == "" {
+		year := strconv.Itoa(time.Now().Year())
+		rq.year = year
+	}
+	qs := make(map[string]string, 0)
+	qs["tahun"] = rq.year
+	switch rq.useRekapLink {
+	case true:
+		qs["idKldi"] = "D128"
+	case false:
+		qs["idSatker"] = rq.idSatker
+	}
+
+	u := addQsToUrl(path, qs)
+
+	return u, nil
 }
 
 type lpseQs struct {
-	rkn_nama  string
-	kategori  string
-	authToken string
+	met               model.MetodeLpse
+	rkn_nama          string
+	kategori          model.KategoriLpse
+	authenticityToken string
+}
+
+func (lq *lpseQs) getauthenticityToken() string {
+	return ""
+}
+
+func lpsePath(m model.MetodeLpse) (*url.URL, error) {
+	if m.IsValid() {
+		var lpsePath *url.URL
+		switch m {
+		case model.Lelang:
+			lpsePath = addPath(lpseBaseUrl, lpsePathLelang)
+		case model.PengadaanLangsung:
+			lpsePath = addPath(lpseBaseUrl, lpsePathPeel)
+		}
+		return lpsePath, nil
+	}
+	return nil, errors.New("not valid metode lpse")
+}
+
+func (lq *lpseQs) buildLpseUrl() (*url.URL, error) {
+	path, err := lpsePath(lq.met)
+	if err != nil {
+		return nil, err
+	}
+	qs := make(map[string]string, 0)
+	qs["rkn_nama"] = lq.rkn_nama
+	qs["kategori"] = lq.kategori
+	qs["authenticityToken"] = lq.authenticityToken
+
+	u := addQsToUrl(path, qs)
+	return u, nil
 }
 
 type urlBuilder struct {
 	tipe       model.Type
-	baseUrl    string
+	basePath   string
 	rupFilter  *rupQs
 	lpseFilter *lpseQs
 }
