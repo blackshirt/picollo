@@ -51,17 +51,17 @@ type rupQs struct {
 	idKldi       string
 }
 
-func (rq *rupQs) perKategoriPath() (*url.URL, error) {
+func (rq *rupQs) rupKategoriPath() (*url.URL, error) {
 	var path *url.URL
 	switch rq.useRekapLink {
 	case true:
-		u, err := fullPath(rq.kategori)
+		u, err := rupFullPath(rq.kategori)
 		if err != nil {
 			return nil, err
 		}
 		path = u
 	case false:
-		u, err := opdPath(rq.kategori)
+		u, err := rupOpdPath(rq.kategori)
 		if err != nil {
 			return nil, err
 		}
@@ -71,7 +71,7 @@ func (rq *rupQs) perKategoriPath() (*url.URL, error) {
 }
 
 func (rq *rupQs) buildRupUrl() (*url.URL, error) {
-	path, err := rq.perKategoriPath()
+	path, err := rq.rupKategoriPath()
 	if err != nil {
 		return nil, err
 	}
@@ -110,9 +110,17 @@ func lpsePath(m model.MetodeLpse) (*url.URL, error) {
 		var lpsePath *url.URL
 		switch m {
 		case model.Lelang:
-			lpsePath = addPath(lpseBaseUrl, lpsePathLelang)
+			link, err := addPath(lpseBaseUrl, lpsePathLelang)
+			if err != nil {
+				return nil, err
+			}
+			lpsePath = link
 		case model.PengadaanLangsung:
-			lpsePath = addPath(lpseBaseUrl, lpsePathPeel)
+			link, err := addPath(lpseBaseUrl, lpsePathPeel)
+			if err != nil {
+				return nil, err
+			}
+			lpsePath = link
 		}
 		return lpsePath, nil
 	}
@@ -126,7 +134,7 @@ func (lq *lpseQs) buildLpseUrl() (*url.URL, error) {
 	}
 	qs := make(map[string]string, 0)
 	qs["rkn_nama"] = lq.rkn_nama
-	qs["kategori"] = lq.kategori
+	qs["kategori"] = lq.kategori.String()
 	qs["authenticityToken"] = lq.authenticityToken
 
 	u := addQsToUrl(path, qs)
@@ -138,6 +146,22 @@ type urlBuilder struct {
 	basePath   string
 	rupFilter  *rupQs
 	lpseFilter *lpseQs
+}
+
+func (ub *urlBuilder) buildURL() (*url.URL, error) {
+	if ub.tipe.IsValid() {
+		switch ub.tipe {
+		case model.TypeRup:
+			u, err := ub.rupFilter.buildRupUrl()
+			if err != nil {
+				return nil, err
+			}
+			return u, nil
+		case model.TypeOpd:
+
+		}
+	}
+	return nil, errors.New("invalid tipe")
 }
 
 func (ub *urlBuilder) baseUrl() (string, error) {
@@ -221,7 +245,7 @@ func (b *linkBuilder) buildPath() (*url.URL, error) {
 	var link *url.URL
 	switch b.useRekap {
 	case true: // use rekap link
-		u, err := fullPath(b.opt.Kategori)
+		u, err := rupFullPath(b.opt.Kategori)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -233,7 +257,7 @@ func (b *linkBuilder) buildPath() (*url.URL, error) {
 		link = addQsToUrl(u, qs)
 
 	case false: //peropd link
-		u, err := opdPath(b.opt.Kategori)
+		u, err := rupOpdPath(b.opt.Kategori)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -248,16 +272,28 @@ func (b *linkBuilder) buildPath() (*url.URL, error) {
 }
 
 //full path
-func fullPath(cat model.Kategori) (*url.URL, error) {
+func rupFullPath(cat model.Kategori) (*url.URL, error) {
 	var link *url.URL
 	if cat.IsValid() {
 		switch cat {
 		case model.KategoriPenyedia:
-			link = addPath(rupBaseUrl, pathFullPenyedia)
+			path, err := addPath(rupBaseUrl, pathFullPenyedia)
+			if err != nil {
+				return nil, err
+			}
+			link = path
 		case model.KategoriSwakelola:
-			link = addPath(rupBaseUrl, pathFullSwakelola)
+			path, err := addPath(rupBaseUrl, pathFullSwakelola)
+			if err != nil {
+				return nil, err
+			}
+			link = path
 		case model.KategoriPenyediaDlmSwakelola:
-			link = addPath(rupBaseUrl, pathFullPenyediaDlmSwakelola)
+			path, err := addPath(rupBaseUrl, pathFullPenyediaDlmSwakelola)
+			if err != nil {
+				return nil, err
+			}
+			link = path
 		default:
 			return nil, errors.New("Not valid full link")
 		}
@@ -267,16 +303,28 @@ func fullPath(cat model.Kategori) (*url.URL, error) {
 }
 
 //peropd path
-func opdPath(cat model.Kategori) (*url.URL, error) {
+func rupOpdPath(cat model.Kategori) (*url.URL, error) {
 	var link *url.URL
 	if cat.IsValid() {
 		switch cat {
 		case model.KategoriPenyedia:
-			link = addPath(rupBaseUrl, pathOpdPenyedia)
+			path, err := addPath(rupBaseUrl, pathOpdPenyedia)
+			if err != nil {
+				return nil, err
+			}
+			link = path
 		case model.KategoriSwakelola:
-			link = addPath(rupBaseUrl, pathOpdSwakelola)
+			path, err := addPath(rupBaseUrl, pathOpdSwakelola)
+			if err != nil {
+				return nil, err
+			}
+			link = path
 		case model.KategoriPenyediaDlmSwakelola:
-			link = addPath(rupBaseUrl, pathOpdPenyediaDlmSwakelola)
+			path, err := addPath(rupBaseUrl, pathOpdPenyediaDlmSwakelola)
+			if err != nil {
+				return nil, err
+			}
+			link = path
 		default:
 			return nil, errors.New("Not valid opd link")
 		}
@@ -285,15 +333,23 @@ func opdPath(cat model.Kategori) (*url.URL, error) {
 	return nil, errors.New("invalid categori")
 }
 
+func rupRekapOpdPath() (*url.URL, error) {
+	link, err := addPath(rupBaseUrl, pathRekap)
+	if err != nil {
+		return nil, err
+	}
+	return link, nil
+}
+
 //add path string to baseUrl percategory to construct url
-func addPath(baseUrl, path string) *url.URL {
+func addPath(baseUrl, path string) (*url.URL, error) {
 	u, err := url.Parse(baseUrl)
 	if err != nil {
 		log.Fatal(err)
-		return nil
+		return nil, err
 	}
 	u.Path += path
-	return u
+	return u, nil
 }
 
 // add query string map to url
