@@ -30,10 +30,34 @@ var (
 	lpsePathPeel   string = "pl"
 )
 
-func getBaseUrl(t model.Type) string {
+type availableQs struct {
+	//all has this
+	tipe model.Type
+
+	//rup
+	year         string
+	useRekapLink bool
+	rupKategori  model.Kategori
+
+	//rekap rup
+	idKldi string
+
+	//peropd rup
+	idSatker string
+
+	//lpse
+	lpseKategori      model.KategoriLpse
+	lpseMetode        model.MetodeLpse
+	rkn_nama          string
+	authenticityToken string
+}
+
+func (aq *availableQs) baseUrl() string {
 	var baseUrl string
-	switch t {
-	case model.TypeRup, model.TypeOpd:
+	switch aq.tipe {
+	case model.TypeRup:
+		baseUrl = rupBaseUrl
+	case model.TypeOpd:
 		baseUrl = rupBaseUrl
 	case model.TypePacket:
 		baseUrl = lpseBaseUrl
@@ -43,133 +67,31 @@ func getBaseUrl(t model.Type) string {
 	return baseUrl
 }
 
-type rupQs struct {
-	useRekapLink bool
-	kategori     model.Kategori
-	year         string
-	idSatker     string
-	idKldi       string
-}
+func (aq *availableQs) basePath() (*url.URL, error) {
 
-func (rq *rupQs) rupKategoriPath() (*url.URL, error) {
-	var path *url.URL
-	switch rq.useRekapLink {
-	case true:
-		u, err := rupFullPath(rq.kategori)
+	switch aq.tipe {
+	case model.TypeRup:
+		path, err := rupPerKategoriPath(aq.rupKategori, aq.useRekapLink)
 		if err != nil {
 			return nil, err
 		}
-		path = u
-	case false:
-		u, err := rupOpdPath(rq.kategori)
+		return path, err
+	case model.TypeOpd:
+		path, err := rupRekapOpdPath()
 		if err != nil {
 			return nil, err
 		}
-		path = u
-	}
-	return path, nil
-}
-
-func (rq *rupQs) buildRupUrl() (*url.URL, error) {
-	path, err := rq.rupKategoriPath()
-	if err != nil {
-		return nil, err
-	}
-
-	if rq.year == "" {
-		year := strconv.Itoa(time.Now().Year())
-		rq.year = year
-	}
-	qs := make(map[string]string, 0)
-	qs["tahun"] = rq.year
-	switch rq.useRekapLink {
-	case true:
-		qs["idKldi"] = "D128"
-	case false:
-		qs["idSatker"] = rq.idSatker
-	}
-
-	u := addQsToUrl(path, qs)
-
-	return u, nil
-}
-
-type lpseQs struct {
-	met               model.MetodeLpse
-	rkn_nama          string
-	kategori          model.KategoriLpse
-	authenticityToken string
-}
-
-func (lq *lpseQs) getauthenticityToken() string {
-	return ""
-}
-
-func lpsePath(m model.MetodeLpse) (*url.URL, error) {
-	if m.IsValid() {
-		var lpsePath *url.URL
-		switch m {
-		case model.Lelang:
-			link, err := addPath(lpseBaseUrl, lpsePathLelang)
-			if err != nil {
-				return nil, err
-			}
-			lpsePath = link
-		case model.PengadaanLangsung:
-			link, err := addPath(lpseBaseUrl, lpsePathPeel)
-			if err != nil {
-				return nil, err
-			}
-			lpsePath = link
+		return path, err
+	case model.TypePacket:
+		path, err := lpsePath(aq.lpseMetode)
+		if err != nil {
+			return nil, err
 		}
-		return lpsePath, nil
+		return path, err
+	default:
+		return nil, errors.New("invalid tipe")
 	}
-	return nil, errors.New("not valid metode lpse")
-}
 
-func (lq *lpseQs) buildLpseUrl() (*url.URL, error) {
-	path, err := lpsePath(lq.met)
-	if err != nil {
-		return nil, err
-	}
-	qs := make(map[string]string, 0)
-	qs["rkn_nama"] = lq.rkn_nama
-	qs["kategori"] = lq.kategori.String()
-	qs["authenticityToken"] = lq.authenticityToken
-
-	u := addQsToUrl(path, qs)
-	return u, nil
-}
-
-type urlBuilder struct {
-	tipe       model.Type
-	basePath   string
-	rupFilter  *rupQs
-	lpseFilter *lpseQs
-}
-
-func (ub *urlBuilder) buildURL() (*url.URL, error) {
-	if ub.tipe.IsValid() {
-		switch ub.tipe {
-		case model.TypeRup:
-			u, err := ub.rupFilter.buildRupUrl()
-			if err != nil {
-				return nil, err
-			}
-			return u, nil
-		case model.TypeOpd:
-
-		}
-	}
-	return nil, errors.New("invalid tipe")
-}
-
-func (ub *urlBuilder) baseUrl() (string, error) {
-	baseUrl := getBaseUrl(ub.tipe)
-	if baseUrl == "" {
-		return "", errors.New("empty baseUrl result")
-	}
-	return baseUrl, nil
 }
 
 type linkBuilder struct {
@@ -271,76 +193,6 @@ func (b *linkBuilder) buildPath() (*url.URL, error) {
 	return link, nil
 }
 
-//full path
-func rupFullPath(cat model.Kategori) (*url.URL, error) {
-	var link *url.URL
-	if cat.IsValid() {
-		switch cat {
-		case model.KategoriPenyedia:
-			path, err := addPath(rupBaseUrl, pathFullPenyedia)
-			if err != nil {
-				return nil, err
-			}
-			link = path
-		case model.KategoriSwakelola:
-			path, err := addPath(rupBaseUrl, pathFullSwakelola)
-			if err != nil {
-				return nil, err
-			}
-			link = path
-		case model.KategoriPenyediaDlmSwakelola:
-			path, err := addPath(rupBaseUrl, pathFullPenyediaDlmSwakelola)
-			if err != nil {
-				return nil, err
-			}
-			link = path
-		default:
-			return nil, errors.New("Not valid full link")
-		}
-		return link, nil
-	}
-	return nil, errors.New("invalid categori")
-}
-
-//peropd path
-func rupOpdPath(cat model.Kategori) (*url.URL, error) {
-	var link *url.URL
-	if cat.IsValid() {
-		switch cat {
-		case model.KategoriPenyedia:
-			path, err := addPath(rupBaseUrl, pathOpdPenyedia)
-			if err != nil {
-				return nil, err
-			}
-			link = path
-		case model.KategoriSwakelola:
-			path, err := addPath(rupBaseUrl, pathOpdSwakelola)
-			if err != nil {
-				return nil, err
-			}
-			link = path
-		case model.KategoriPenyediaDlmSwakelola:
-			path, err := addPath(rupBaseUrl, pathOpdPenyediaDlmSwakelola)
-			if err != nil {
-				return nil, err
-			}
-			link = path
-		default:
-			return nil, errors.New("Not valid opd link")
-		}
-		return link, nil
-	}
-	return nil, errors.New("invalid categori")
-}
-
-func rupRekapOpdPath() (*url.URL, error) {
-	link, err := addPath(rupBaseUrl, pathRekap)
-	if err != nil {
-		return nil, err
-	}
-	return link, nil
-}
-
 //add path string to baseUrl percategory to construct url
 func addPath(baseUrl, path string) (*url.URL, error) {
 	u, err := url.Parse(baseUrl)
@@ -362,12 +214,15 @@ func addQsToUrl(u *url.URL, qs map[string]string) *url.URL {
 	return u
 }
 
-// Response semua rup lewat penyedia
-// 0: "22605363"
-// 1: "SMPN 1 BULUSPESANTREN"
-// 2: "Penyediaan Bantuan Operasional Sekolah (BOS) jenjang SD/MI/SDLB dan SMP/MTS serta pesantren Salafiyah dan Satuan Pendidikan Non Islam Setara SD dan SMP"
-// 3: "160000000"
-// 4: "Pengadaan Langsung"
-// 5: "APBD"
-// 6: "22605363"
-// 7: "January 2020"
+func addYeartoPath(u *url.URL, year string) (*url.URL, error) {
+	if u == nil {
+		return nil, errors.New("Nil base path")
+	}
+	q := u.Query()
+	if year == "" {
+		year = strconv.Itoa(time.Now().Year())
+	}
+	q.Set("tahun", year)
+	u.RawQuery = q.Encode()
+	return u, nil
+}
