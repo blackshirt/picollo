@@ -46,52 +46,37 @@ type availableQs struct {
 	idSatker string
 
 	//lpse
+	lpseMetode model.MetodeLpse
+
 	lpseKategori      model.KategoriLpse
-	lpseMetode        model.MetodeLpse
 	rkn_nama          string
 	authenticityToken string
 }
 
-func (aq *availableQs) baseUrl() string {
-	var baseUrl string
-	switch aq.tipe {
-	case model.TypeRup:
-		baseUrl = rupBaseUrl
-	case model.TypeOpd:
-		baseUrl = rupBaseUrl
-	case model.TypePacket:
-		baseUrl = lpseBaseUrl
-	default:
-		baseUrl = ""
+func (aq *availableQs) BuildURL() (*url.URL, error) {
+	if aq.tipe.IsValid() {
+		switch aq.tipe {
+		case model.TypeRup:
+			u, err := buildRupURL(aq.rupKategori, aq.useRekapLink, aq.year, aq.idSatker)
+			if err != nil {
+				return nil, errors.New("error build rup url")
+			}
+			return u, nil
+		case model.TypeOpd:
+			u, err := buildOpdURL(aq.year)
+			if err != nil {
+				return nil, errors.New("error build opd url")
+			}
+			return u, nil
+		case model.TypePacket:
+			u, err := buildLpseURL(aq.lpseMetode, aq.authenticityToken, aq.lpseKategori, aq.rkn_nama)
+			if err != nil {
+				return nil, errors.New("error build lpse url")
+			}
+			return u, nil
+		}
 	}
-	return baseUrl
-}
-
-func (aq *availableQs) basePath() (*url.URL, error) {
-
-	switch aq.tipe {
-	case model.TypeRup:
-		path, err := rupPerKategoriPath(aq.rupKategori, aq.useRekapLink)
-		if err != nil {
-			return nil, err
-		}
-		return path, err
-	case model.TypeOpd:
-		path, err := rupRekapOpdPath()
-		if err != nil {
-			return nil, err
-		}
-		return path, err
-	case model.TypePacket:
-		path, err := lpsePath(aq.lpseMetode)
-		if err != nil {
-			return nil, err
-		}
-		return path, err
-	default:
-		return nil, errors.New("invalid tipe")
-	}
-
+	return nil, errors.New("invalid tipe")
 }
 
 type linkBuilder struct {

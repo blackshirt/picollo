@@ -9,3 +9,19 @@ func rupRekapOpdPath() (*url.URL, error) {
 	}
 	return path, nil
 }
+
+func buildOpdURL(year string) (*url.URL, error) {
+	p, err := rupRekapOpdPath()
+	if err != nil {
+		return nil, err
+	}
+	l, err := setYearQs(p, year)
+	if err != nil {
+		return nil, err
+	}
+	u, err := setQs(l, "idKldi", "D128")
+	if err != nil {
+		return nil, err
+	}
+	return u, nil
+}
