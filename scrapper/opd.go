@@ -15,7 +15,7 @@ func buildOpdURL(year string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
-	l, err := setYearQs(p, year)
+	l, err := addYeartoPath(p, year)
 	if err != nil {
 		return nil, err
 	}

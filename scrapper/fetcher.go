@@ -77,56 +77,56 @@ func (f *collyScrapper) decode(b *Results) (*rupResponse, error) {
 	return resp, nil
 }
 
-// Fetch rup with spesific option and return response
-func (f *collyScrapper) fetchRup(opt model.RupOptions) (*rupResponse, error) {
-	b := NewLinkBuilder(UseRupOption(opt))
-	link, err := b.buildPath()
-	if err != nil {
-		log.Fatal(err)
-		return nil, errors.New("error in fetchRup")
-	}
+// // Fetch rup with spesific option and return response
+// func (f *collyScrapper) fetchRup(opt model.RupOptions) (*rupResponse, error) {
+// 	b := NewLinkBuilder(UseRupOption(opt))
+// 	link, err := b.buildPath()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 		return nil, errors.New("error in fetchRup")
+// 	}
 
-	resp, err := f.unmarshall(link.String())
-	if err != nil {
-		log.Fatal(err)
-	}
-	return resp, nil
-}
+// 	resp, err := f.unmarshall(link.String())
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return resp, nil
+// }
 
-// Fetch rekap rup with spesific option and return response
-func (f *collyScrapper) fetchRekap(opt model.RupOptions) (*rupResponse, error) {
-	b := NewLinkBuilder(
-		UseRupOption(opt),
-		UseRekap(true),
-	)
-	link, err := b.buildPath()
-	if err != nil {
-		log.Fatal(err)
-	}
-	resp, err := f.unmarshall(link.String())
-	if err != nil {
-		log.Fatal(err)
-	}
-	return resp, nil
-}
+// // Fetch rekap rup with spesific option and return response
+// func (f *collyScrapper) fetchRekap(opt model.RupOptions) (*rupResponse, error) {
+// 	b := NewLinkBuilder(
+// 		UseRupOption(opt),
+// 		UseRekap(true),
+// 	)
+// 	link, err := b.buildPath()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	resp, err := f.unmarshall(link.String())
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	return resp, nil
+// }
 
-func (f *collyScrapper) unmarshall(link string) (*rupResponse, error) {
-	response := &rupResponse{}
-	f.client.OnResponse(func(r *colly.Response) {
-		err := json.Unmarshal(r.Body, response)
-		if err != nil {
-			log.Fatalln(err)
-		}
-	})
+// func (f *collyScrapper) unmarshall(link string) (*rupResponse, error) {
+// 	response := &rupResponse{}
+// 	f.client.OnResponse(func(r *colly.Response) {
+// 		err := json.Unmarshal(r.Body, response)
+// 		if err != nil {
+// 			log.Fatalln(err)
+// 		}
+// 	})
 
-	f.client.OnError(func(r *colly.Response, err error) {
-		log.Println("error:", r.StatusCode, err)
-	})
+// 	f.client.OnError(func(r *colly.Response, err error) {
+// 		log.Println("error:", r.StatusCode, err)
+// 	})
 
-	if err := f.client.Visit(link); err != nil {
-		log.Fatal(err)
-		return nil, errors.New("collector error in visit")
-	}
-	f.client.Wait()
-	return response, nil
-}
+// 	if err := f.client.Visit(link); err != nil {
+// 		log.Fatal(err)
+// 		return nil, errors.New("collector error in visit")
+// 	}
+// 	f.client.Wait()
+// 	return response, nil
+// }

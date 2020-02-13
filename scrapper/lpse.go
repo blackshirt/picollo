@@ -1,7 +1,6 @@
 package scrapper
 
 import (
-	"errors"
 	"net/url"
 
 	"picollo/model"
@@ -24,7 +23,7 @@ func lpsePath(m model.MetodeLpse) (*url.URL, error) {
 			return link, nil
 		}
 	}
-	return nil, errors.New("not valid metode lpse")
+	return nil, ErrInvalidLpseMetode
 }
 
 func buildLpseURL(m model.MetodeLpse, token string, k model.KategoriLpse, rkn string) (*url.URL, error) {
@@ -40,7 +39,7 @@ func buildLpseURL(m model.MetodeLpse, token string, k model.KategoriLpse, rkn st
 
 func setAuthToken(p *url.URL, token string) (*url.URL, error) {
 	if p == nil {
-		return nil, errors.New("nil path")
+		return nil, ErrNilURL
 	}
 	l, err := setQs(p, "authenticityToken", token)
 	if err != nil {
@@ -51,7 +50,7 @@ func setAuthToken(p *url.URL, token string) (*url.URL, error) {
 
 func setRknNama(p *url.URL, rkn string) (*url.URL, error) {
 	if p == nil {
-		return nil, errors.New("nil url")
+		return nil, ErrNilURL
 	}
 	l, err := setQs(p, "rkn_nama", rkn)
 	if err != nil {
@@ -62,7 +61,7 @@ func setRknNama(p *url.URL, rkn string) (*url.URL, error) {
 
 func setLpseKategori(p *url.URL, k model.KategoriLpse) (*url.URL, error) {
 	if p == nil {
-		return nil, errors.New("nil url")
+		return nil, ErrNilURL
 	}
 	l, err := setQs(p, "kategori", k.String())
 	if err != nil {

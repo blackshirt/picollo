@@ -1,10 +1,7 @@
 package scrapper
 
 import (
-	"errors"
 	"net/url"
-	"strconv"
-	"time"
 
 	"picollo/model"
 )
@@ -65,7 +62,7 @@ func rupOpdPath(cat model.Kategori) (*url.URL, error) {
 			return path, nil
 		}
 	}
-	return nil, errors.New("invalid categori")
+	return nil, ErrInvalidCategori
 }
 
 //full path
@@ -93,7 +90,7 @@ func rupFullPath(cat model.Kategori) (*url.URL, error) {
 		}
 
 	}
-	return nil, errors.New("invalid categori")
+	return nil, ErrInvalidCategori
 }
 
 func addQsToRupFullPath(c model.Kategori, year string) (*url.URL, error) {
@@ -101,7 +98,7 @@ func addQsToRupFullPath(c model.Kategori, year string) (*url.URL, error) {
 	if err != nil {
 		return nil, err
 	}
-	u, _ := setYearQs(path, year)
+	u, _ := addYeartoPath(path, year)
 	link, err := setQs(u, "idKldi", "D128")
 	return link, err
 }
@@ -111,26 +108,7 @@ func addQsToOpdPath(c model.Kategori, year string, idSatker string) (*url.URL, e
 	if err != nil {
 		return nil, err
 	}
-	u, _ := setYearQs(p, year)
+	u, _ := addYeartoPath(p, year)
 	link, err := setQs(u, "idSatker", idSatker)
 	return link, err
-}
-
-func setQs(path *url.URL, key, value string) (*url.URL, error) {
-	if path == nil {
-		return nil, errors.New("Nil path")
-	}
-	q := path.Query()
-	q.Set(key, value)
-	path.RawQuery = q.Encode()
-	return path, nil
-}
-
-func setYearQs(u *url.URL, year string) (*url.URL, error) {
-	if year == "" {
-		year = strconv.Itoa(time.Now().Year())
-	}
-	path, err := setQs(u, "tahun", year)
-
-	return path, err
 }
