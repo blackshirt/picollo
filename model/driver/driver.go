@@ -12,6 +12,15 @@ import (
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 
+var (
+	ErrNoCursorProvided      = errors.New("Error No cursor provided")
+	ErrTypeNoExist  = errors.New("Error your tipe was not exist in store")
+	ErrUnknownObject = errors.New("Error unknown obj to insert")
+	ErrInQuery       = errors.New("Error in cur one/all")
+	ErrInvalidType   = errors.New("Error invalid tipe")
+	ErrNoAVT         = errors.New("Error has no AvT")
+)
+
 type Storager interface {
 	// what type the Storager provides
 	AvailableType() ([]model.Type, error)
@@ -59,7 +68,7 @@ func NewRdbStore(s *r.Session, avt []model.Type) Storager {
 // AvailableType implement AvailableType interface method of Storager
 func (s rdbStore) AvailableType() ([]model.Type, error) {
 	if s.hasEmptyAvT() {
-		return nil, errors.New("has no AvT")
+		return nil, ErrNoAVT
 	}
 	return s.avt, nil
 }
@@ -69,7 +78,7 @@ func (s rdbStore) AvailableType() ([]model.Type, error) {
 func (s rdbStore) Load(ctx context.Context, t model.Type, key string) (*Result, error) {
 	// check if tipe `t` was valid tipe and available in the store
 	if !s.containsType(t) && !t.IsValid() {
-		return nil, errors.New("your tipe was not in store")
+		return nil, ErrTypeNoExist
 	}
 
 	// run the get query
@@ -87,7 +96,7 @@ func (s rdbStore) Load(ctx context.Context, t model.Type, key string) (*Result, 
 // All return all item based on tipe `t`
 func (s rdbStore) All(ctx context.Context, t model.Type) (*Result, error) {
 	if !s.containsType(t) && !t.IsValid() {
-		return nil, errors.New("your tipe was not in store")
+		return nil, ErrTypeNoExist
 	}
 	cur, err := r.Table(t.String()).Run(s.sess, r.RunOpts{Context: ctx})
 	if err != nil {
@@ -133,7 +142,7 @@ func (s rdbStore) Save(ctx context.Context, obj interface{}) error {
 
 		return err
 	default:
-		return errors.New("unknown obj to insert")
+		return ErrUnknownObject
 	}
 }
 
@@ -161,11 +170,11 @@ func (s rdbStore) containsType(t model.Type) bool {
 // loadRup load single rupitem with id `key` using provided rethinkdb cursor `c`
 func loadRup(c *r.Cursor, key string) (*model.RupItem, error) {
 	if c == nil {
-		return nil, errors.New("No cursor provided")
+		return nil, ErrNoCursorProvided
 	}
 	rup := &model.RupItem{}
 	if err := c.One(&rup); err != nil {
-		return nil, errors.New("erros in rup cur one")
+		return nil, ErrInQuery
 	}
 	return rup, nil
 
@@ -174,11 +183,11 @@ func loadRup(c *r.Cursor, key string) (*model.RupItem, error) {
 // allRup load all rupitem with using provided rethinkdb cursor c
 func allRup(c *r.Cursor) ([]model.RupItem, error) {
 	if c == nil {
-		return nil, errors.New("No cursor provided")
+		return nil, ErrNoCursorProvided
 	}
 	rups := make([]model.RupItem, 0)
 	if err := c.All(&rups); err != nil {
-		return nil, errors.New("erros in rups cur all")
+		return nil, ErrInQuery
 	}
 	return rups, nil
 
@@ -187,11 +196,11 @@ func allRup(c *r.Cursor) ([]model.RupItem, error) {
 // loadOpd load single opditem with id key using provided rethinkdb cursor c
 func loadOpd(c *r.Cursor, key string) (*model.OpdItem, error) {
 	if c == nil {
-		return nil, errors.New("No cursor provided")
+		return nil, ErrNoCursorProvided
 	}
 	opd := &model.OpdItem{}
 	if err := c.One(&opd); err != nil {
-		return nil, errors.New("erros in opd cur one")
+		return nil, ErrInQuery
 	}
 	return opd, nil
 
@@ -200,11 +209,11 @@ func loadOpd(c *r.Cursor, key string) (*model.OpdItem, error) {
 // allOpd load all opditem using provided rethinkdb cursor `c`
 func allOpd(c *r.Cursor) ([]model.OpdItem, error) {
 	if c == nil {
-		return nil, errors.New("No cursor provided")
+		return nil, ErrNoCursorProvided
 	}
 	opds := make([]model.OpdItem, 0)
 	if err := c.All(&opds); err != nil {
-		return nil, errors.New("erros in opds cur all")
+		return nil, ErrInQuery
 	}
 	return opds, nil
 
@@ -213,11 +222,11 @@ func allOpd(c *r.Cursor) ([]model.OpdItem, error) {
 // loadPacket load single packetitem with id `key` using provided rethinkdb cursor `c`
 func loadPacket(c *r.Cursor, key string) (*model.PacketItem, error) {
 	if c == nil {
-		return nil, errors.New("No cursor provided")
+		return nil, ErrNoCursorProvided
 	}
 	pck := &model.PacketItem{}
 	if err := c.One(&pck); err != nil {
-		return nil, errors.New("erros in opd pck one")
+		return nil, ErrInQuery
 	}
 	return pck, nil
 
@@ -226,12 +235,12 @@ func loadPacket(c *r.Cursor, key string) (*model.PacketItem, error) {
 // allPacket load all packetitem using provided rethinkdb cursor `c`
 func allPacket(c *r.Cursor) ([]model.PacketItem, error) {
 	if c == nil {
-		return nil, errors.New("No cursor provided")
+		return nil, ErrNoCursorProvided
 	}
 
 	pcks := make([]model.PacketItem, 0)
 	if err := c.All(&pcks); err != nil {
-		return nil, errors.New("erros in opds cur all")
+		return nil, ErrInQuery
 	}
 
 	return pcks, nil
@@ -240,8 +249,11 @@ func allPacket(c *r.Cursor) ([]model.PacketItem, error) {
 // loadItem load single specific item based on tipe `t` and id `key` using
 // provided rethinkdb Cursor `c`
 func loadItem(c *r.Cursor, t model.Type, key string) (*Result, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
 	if !t.IsValid() {
-		return nil, errors.New("errors tipe was not valid")
+		return nil, ErrInvalidType
 	}
 	res := &Result{Tipe: t}
 	switch t {
@@ -269,8 +281,11 @@ func loadItem(c *r.Cursor, t model.Type, key string) (*Result, error) {
 
 // allItem load all item with specific tipe `t` using provided rethinkdb cursor `c`
 func allItem(c *r.Cursor, t model.Type) (*Result, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
 	if !t.IsValid() {
-		return nil, errors.New("errors tipe was not valid")
+		return nil, ErrInvalidType
 	}
 
 	res := &Result{Tipe: t}
@@ -310,7 +325,7 @@ type Service interface {
 type serviceManager struct {
 	store *Storager
 
-	l   sync.RWMutex
+	mu  sync.RWMutex
 	avS map[string]interface{}
 }
 

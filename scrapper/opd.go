@@ -2,7 +2,8 @@ package scrapper
 
 import "net/url"
 
-func rupRekapOpdPath() (*url.URL, error) {
+// get rekap rup path
+func rekapOpdPath() (*url.URL, error) {
 	path, err := addPath(rupBaseUrl, pathRekap)
 	if err != nil {
 		return nil, err
@@ -10,8 +11,9 @@ func rupRekapOpdPath() (*url.URL, error) {
 	return path, nil
 }
 
+// build rekap rup url
 func buildOpdURL(year string) (*url.URL, error) {
-	p, err := rupRekapOpdPath()
+	p, err := rekapOpdPath()
 	if err != nil {
 		return nil, err
 	}

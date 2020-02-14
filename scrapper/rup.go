@@ -6,16 +6,17 @@ import (
 	"picollo/model"
 )
 
-func rupPerKategoriPath(cat model.Kategori, useRekap bool) (*url.URL, error) {
+// get rup path based on kategori `c` and flag `useRekap`
+func rupPerKategoriPath(c model.Kategori, useRekap bool) (*url.URL, error) {
 	if useRekap {
-		path, err := rupFullPath(cat)
+		path, err := perfullPath(c)
 		if err != nil {
 			return nil, err
 		}
 		return path, nil
 	}
 
-	path, err := rupOpdPath(cat)
+	path, err := peropdPath(c)
 	if err != nil {
 		return nil, err
 	}
@@ -23,6 +24,7 @@ func rupPerKategoriPath(cat model.Kategori, useRekap bool) (*url.URL, error) {
 	return path, nil
 }
 
+// build rup Url
 func buildRupURL(c model.Kategori, useRekap bool, tahun string, idSatker string) (*url.URL, error) {
 	if useRekap {
 		u, err := addQsToRupFullPath(c, tahun)
@@ -39,9 +41,9 @@ func buildRupURL(c model.Kategori, useRekap bool, tahun string, idSatker string)
 }
 
 //peropd path
-func rupOpdPath(cat model.Kategori) (*url.URL, error) {
-	if cat.IsValid() {
-		switch cat {
+func peropdPath(c model.Kategori) (*url.URL, error) {
+	if c.IsValid() {
+		switch c {
 		case model.KategoriPenyedia:
 			path, err := addPath(rupBaseUrl, pathOpdPenyedia)
 			if err != nil {
@@ -66,9 +68,9 @@ func rupOpdPath(cat model.Kategori) (*url.URL, error) {
 }
 
 //full path
-func rupFullPath(cat model.Kategori) (*url.URL, error) {
-	if cat.IsValid() {
-		switch cat {
+func perfullPath(c model.Kategori) (*url.URL, error) {
+	if c.IsValid() {
+		switch c {
 		case model.KategoriPenyedia:
 			path, err := addPath(rupBaseUrl, pathFullPenyedia)
 			if err != nil {
@@ -93,8 +95,9 @@ func rupFullPath(cat model.Kategori) (*url.URL, error) {
 	return nil, ErrInvalidCategori
 }
 
+// set query string for full rup path
 func addQsToRupFullPath(c model.Kategori, year string) (*url.URL, error) {
-	path, err := rupFullPath(c)
+	path, err := perfullPath(c)
 	if err != nil {
 		return nil, err
 	}
@@ -103,8 +106,9 @@ func addQsToRupFullPath(c model.Kategori, year string) (*url.URL, error) {
 	return link, err
 }
 
+// set query string for peropd rup path for satker `idSatker`
 func addQsToOpdPath(c model.Kategori, year string, idSatker string) (*url.URL, error) {
-	p, err := rupOpdPath(c)
+	p, err := peropdPath(c)
 	if err != nil {
 		return nil, err
 	}

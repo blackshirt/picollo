@@ -10,7 +10,7 @@ var (
 	ErrNilURL            = errors.New("Error in operate on nil URL")
 	ErrInvalidTipe       = errors.New("Error in operate on invalid tipe")
 	ErrInvalidCategori   = errors.New("Error in operate on invalid categori")
-	ErrInBuildURL        = errors.New("Error in building url")
+	ErrBuildURL          = errors.New("Error in building url")
 	ErrInvalidLpseMetode = errors.New("Error invalid lpse methode")
 )
 var (
@@ -56,25 +56,26 @@ type availableQs struct {
 	authenticityToken string
 }
 
+// BuildURL build full url
 func (aq *availableQs) BuildURL() (*url.URL, error) {
 	if aq.tipe.IsValid() {
 		switch aq.tipe {
 		case model.TypeRup:
 			u, err := buildRupURL(aq.rupKategori, aq.useRekapLink, aq.year, aq.idSatker)
 			if err != nil {
-				return nil, ErrInBuildURL
+				return nil, ErrBuildURL
 			}
 			return u, nil
 		case model.TypeOpd:
 			u, err := buildOpdURL(aq.year)
 			if err != nil {
-				return nil, ErrInBuildURL
+				return nil, ErrBuildURL
 			}
 			return u, nil
 		case model.TypePacket:
 			u, err := buildLpseURL(aq.lpseMetode, aq.authenticityToken, aq.lpseKategori, aq.rkn_nama)
 			if err != nil {
-				return nil, ErrInBuildURL
+				return nil, ErrBuildURL
 			}
 			return u, nil
 		}
@@ -82,6 +83,7 @@ func (aq *availableQs) BuildURL() (*url.URL, error) {
 	return nil, ErrInvalidTipe
 }
 
+// set query string k=v to url `u`
 func setQs(path *url.URL, key, value string) (*url.URL, error) {
 	if path == nil {
 		return nil, ErrNilURL
@@ -92,6 +94,7 @@ func setQs(path *url.URL, key, value string) (*url.URL, error) {
 	return path, nil
 }
 
+// add year `y` query string to url `u`
 func addYeartoPath(u *url.URL, year string) (*url.URL, error) {
 	u, err := setQs(u, "tahun", year)
 	if err != nil {

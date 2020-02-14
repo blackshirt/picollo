@@ -6,6 +6,7 @@ import (
 	"picollo/model"
 )
 
+// lpsePath get lpse path from metode `m`
 func lpsePath(m model.MetodeLpse) (*url.URL, error) {
 	if m.IsValid() {
 		switch m {
@@ -26,6 +27,7 @@ func lpsePath(m model.MetodeLpse) (*url.URL, error) {
 	return nil, ErrInvalidLpseMetode
 }
 
+// buildLpseURL build lpse url using params provided
 func buildLpseURL(m model.MetodeLpse, token string, k model.KategoriLpse, rkn string) (*url.URL, error) {
 	path, err := lpsePath(m)
 	if err != nil {
@@ -37,35 +39,38 @@ func buildLpseURL(m model.MetodeLpse, token string, k model.KategoriLpse, rkn st
 	return u, err
 }
 
+// setAuthToken set authenticityToken query string to lpse path using `token`
 func setAuthToken(p *url.URL, token string) (*url.URL, error) {
 	if p == nil {
 		return nil, ErrNilURL
 	}
-	l, err := setQs(p, "authenticityToken", token)
+	u, err := setQs(p, "authenticityToken", token)
 	if err != nil {
 		return nil, err
 	}
-	return l, nil
+	return u, nil
 }
 
+// setRknNama set rkn_nama query string to lpse path
 func setRknNama(p *url.URL, rkn string) (*url.URL, error) {
 	if p == nil {
 		return nil, ErrNilURL
 	}
-	l, err := setQs(p, "rkn_nama", rkn)
+	u, err := setQs(p, "rkn_nama", rkn)
 	if err != nil {
 		return nil, err
 	}
-	return l, nil
+	return u, nil
 }
 
+// setLpseKategori set kategori query string to lpse path
 func setLpseKategori(p *url.URL, k model.KategoriLpse) (*url.URL, error) {
 	if p == nil {
 		return nil, ErrNilURL
 	}
-	l, err := setQs(p, "kategori", k.String())
+	u, err := setQs(p, "kategori", k.String())
 	if err != nil {
 		return nil, err
 	}
-	return l, nil
+	return u, nil
 }

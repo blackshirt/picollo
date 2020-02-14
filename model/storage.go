@@ -2,183 +2,311 @@ package model
 
 import (
 	"context"
-	"log"
+	"errors"
 
 	r "gopkg.in/rethinkdb/rethinkdb-go.v5"
 )
 
-type RupStorage interface {
-	Rup(ctx context.Context, id string) (RupItem, error)
-	SaveRup(ctx context.Context, objs []RupItem) error
-	FilteredRup(ctx context.Context, opt RupOptions) ([]RupItem, error)
-	AllRup(ctx context.Context) ([]RupItem, error)
-}
+var (
+	ErrNoCursorProvided = errors.New("Error No cursor provided")
+	ErrTypeNoExist      = errors.New("Error your tipe was not exist in store")
+	ErrUnknownObject    = errors.New("Error unknown object to insert")
+	ErrInQuery          = errors.New("Error in cursor one/all")
+	ErrInvalidType      = errors.New("Error invalid tipe")
+	ErrNoAVT            = errors.New("Error has no AvT")
+)
 
-type OpdStorage interface {
-	Opd(ctx context.Context, id string) (OpdItem, error)
-	SaveOpd(ctx context.Context, objs []OpdItem) error
-}
+type Storager interface {
+	// what type the Storager provides
+	AvailableType() ([]Type, error)
 
-type Storage interface {
-	RupStorage
-	OpdStorage
-	RupForOpd(ctx context.Context, opd OpdItem) ([]RupItem, error)
+	// Load load the model with type t and key ke  from underlying backend implementation
+	Load(ctx context.Context, t Type, key string) (*Result, error)
+
+	// Save saving the obj data to the backend implementation
+	Save(ctx context.Context, obj interface{}) error
+
+	// Exists check whether model with tipe t and key key was there in backend
 	Exists(ctx context.Context, t Type, key string) bool
+
+	// All return all model data available in the backend
+	All(ctx context.Context, t Type) (*Result, error)
 }
 
-// rup item
-type rethinkStorage struct {
-	session *r.Session
+// Result of the operation
+type Result struct {
+	// tipe the result provided
+	Tipe Type
+	// underlying data
+	Data interface{}
 }
 
-func NewRethinkStorage(s *r.Session) Storage {
-	return &rethinkStorage{session: s}
+// rethinkdb Storager implementation
+type rdbStore struct {
+	sess *r.Session // rethinkdb session
+	avt  []Type     // availablye type
 }
 
-//
-func (repo *rethinkStorage) Rup(ctx context.Context, id string) (RupItem, error) {
-	var m RupItem
-	res, err := r.Table("rup_item").Get(id).Run(repo.session, r.RunOpts{Context: ctx})
-	res.One(&m)
-	return m, err
-}
+var defaultAvt []Type = AllType
 
-func (repo *rethinkStorage) Opd(ctx context.Context, pkey string) (OpdItem, error) {
-	var m OpdItem
-	res, err := r.Table("rup_rekap").Get(pkey).Run(repo.session, r.RunOpts{Context: ctx})
-	res.One(&m)
-	return m, err
-}
-
-func (repo *rethinkStorage) SaveRup(ctx context.Context, obj []RupItem) error {
-	_, err := r.Table("rup_item").Insert(obj).RunWrite(repo.session, r.RunOpts{Context: ctx})
-
-	return err
-}
-
-func (repo *rethinkStorage) SaveOpd(ctx context.Context, obj []OpdItem) error {
-	_, err := r.Table("rup_rekap").Insert(obj).RunWrite(repo.session, r.RunOpts{Context: ctx})
-
-	return err
-}
-
-func (rdb *rethinkStorage) RupForOpd(ctx context.Context, opd OpdItem) ([]RupItem, error) {
-	rows, err := r.Table("rup_item").GetAllByIndex("kodeOpd", opd.KodeOpd).Run(rdb.session, r.RunOpts{Context: ctx})
-	if err != nil {
-		log.Fatal(err)
+// NewRdbStore creates RethinkDB storage
+func NewRdbStore(s *r.Session, avt []Type) Storager {
+	if avt == nil {
+		avt = defaultAvt
 	}
-	var rups []RupItem
-	err2 := rows.All(&rups)
-	if err2 != nil {
-		log.Fatal(err2)
+	return &rdbStore{
+		sess: s,
+		avt:  avt,
+	}
+}
+
+// AvailableType implement AvailableType interface method of Storager
+func (s rdbStore) AvailableType() ([]Type, error) {
+	if s.hasEmptyAvT() {
+		return nil, ErrNoAVT
+	}
+	return s.avt, nil
+}
+
+// Load implement the Load method of the Storager interface, load single item
+// based on tipe `t` and id `key`
+func (s rdbStore) Load(ctx context.Context, t Type, key string) (*Result, error) {
+	// check if tipe `t` was valid tipe and available in the store
+	if !s.containsType(t) && !t.IsValid() {
+		return nil, ErrTypeNoExist
+	}
+
+	// run the get query
+	cur, err := r.Table(t.String()).Get(key).Run(s.sess, r.RunOpts{Context: ctx})
+	if err != nil {
 		return nil, err
 	}
-	return rups, nil
-
-}
-
-func (repo rethinkStorage) AllRup(ctx context.Context) ([]RupItem, error) {
-	rows, err := r.Table("rup_item").Run(repo.session, r.RunOpts{Context: ctx})
+	res, err := loadItem(cur, t, key)
 	if err != nil {
-		log.Fatal(err)
-	}
-	rups := make([]RupItem, 0)
-	err2 := rows.All(&rups)
-	if err2 != nil {
-		log.Fatal(err2)
 		return nil, err
 	}
-	return rups, nil
+	return res, nil
 }
 
-func (repo *rethinkStorage) FilteredRup(ctx context.Context, opt RupOptions) ([]RupItem, error) {
-	rows := r.Table("rup_item").GetAllByIndex("kodeOpd", opt.KodeOpd).Filter(
-		r.Row.Field("kategori").Eq(opt.Kategori)).Filter(
-		r.Row.Field("tahun").Eq(opt.Tahun))
-	// check for nullable option
-	if opt.Metode != nil {
-		rows = rows.Filter(r.Row.Field("metode").Eq(opt.Metode))
+// All return all item based on tipe `t`
+func (s rdbStore) All(ctx context.Context, t Type) (*Result, error) {
+	if !s.containsType(t) && !t.IsValid() {
+		return nil, ErrTypeNoExist
 	}
-	if opt.State != nil {
-		rows = rows.Filter(r.Row.Field("state").Eq(opt.State))
-	}
-	if opt.Jenis != nil {
-		rows = rows.Filter(r.Row.Field("jenis").Eq(opt.Jenis))
-	}
-	res, err := rows.Run(repo.session, r.RunOpts{Context: ctx})
+	cur, err := r.Table(t.String()).Run(s.sess, r.RunOpts{Context: ctx})
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	var rups []RupItem
-	err2 := res.All(&rups)
-	if err2 != nil {
-		log.Fatal(err2)
-		return nil, err2
+	res, err := allItem(cur, t)
+	if err != nil {
+		return nil, err
 	}
-	return rups, nil
+
+	return res, nil
 }
 
-func (repo *rethinkStorage) Exists(ctx context.Context, t Type, key string) bool {
-	var s bool
-	switch t {
-	case TypeRup:
-		cur, err := r.Table(t.String()).GetAll(key).Count().Eq(1).Run(repo.session, r.RunOpts{Context: ctx})
-		if err != nil {
-			return false
-		}
-		if err2 := cur.One(&s); err2 != nil {
-			return false
-		}
-		return s
-	case TypeOpd:
-		cur, err := r.Table(t.String()).GetAll(key).Count().Eq(1).Run(repo.session, r.RunOpts{Context: ctx})
-		if err != nil {
-			return false
-		}
-		if err2 := cur.One(&s); err2 != nil {
-			return false
-		}
-		return s
-	case TypePacket:
-		cur, err := r.Table(t.String()).GetAll(key).Count().Eq(1).Run(repo.session, r.RunOpts{Context: ctx})
-		if err != nil {
-			return false
-		}
-		if err2 := cur.One(&s); err2 != nil {
-			return false
-		}
-		return s
-	default:
+// Exists check whether item tipe `t` and id `key` was exist in the store
+func (s rdbStore) Exists(ctx context.Context, t Type, key string) bool {
+	if !s.containsType(t) && !t.IsValid() {
 		return false
 	}
+	_, err := r.Table(t.String()).GetAll(key).Count().Eq(1).Run(s.sess, r.RunOpts{Context: ctx})
+	if err == nil {
+		return true
+	}
+
+	return false
 }
 
-// service part
-type Service interface {
-	Get(ctx context.Context, id string) (RupItem, error)
-	Rup(ctx context.Context, opt RupOptions) ([]RupItem, error)
-	Exists(ctx context.Context, t Type, key string) bool
+// Save saving the object `obj` to the backend storage
+func (s rdbStore) Save(ctx context.Context, obj interface{}) error {
+	switch obj.(type) {
+	case *RupItem, []*RupItem:
+		tbl := TypeRup.String()
+		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
+
+		return err
+	case *OpdItem, []*OpdItem:
+		tbl := TypeOpd.String()
+		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
+
+		return err
+	case *PacketItem, []*PacketItem:
+		tbl := TypePacket.String()
+		_, err := r.Table(tbl).Insert(obj).RunWrite(s.sess, r.RunOpts{Context: ctx})
+
+		return err
+	default:
+		return ErrUnknownObject
+	}
 }
 
-type rupService struct {
-	repo Storage
+// hasEmptyAvT check whether the storage has available tipe
+func (s rdbStore) hasEmptyAvT() bool {
+	if s.avt == nil || len(s.avt) == 0 {
+		return true
+	}
+	return false
 }
 
-func NewService(s Storage) Service {
-	return &rupService{s}
+// containsType check the store contains tipe `t`
+func (s rdbStore) containsType(t Type) bool {
+	if s.hasEmptyAvT() {
+		return false
+	}
+	for _, item := range s.avt {
+		if item == t {
+			return true
+		}
+	}
+	return false
 }
 
-// implement the interface
+// loadRup load single rupitem with id `key` using provided rethinkdb cursor `c`
+func loadRup(c *r.Cursor, key string) (*RupItem, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
+	rup := &RupItem{}
+	if err := c.One(&rup); err != nil {
+		return nil, ErrInQuery
+	}
+	return rup, nil
 
-func (s *rupService) Get(ctx context.Context, id string) (RupItem, error) {
-	return s.repo.Rup(ctx, id)
 }
 
-func (s *rupService) Rup(ctx context.Context, opt RupOptions) ([]RupItem, error) {
-	rups, err := s.repo.FilteredRup(ctx, opt)
-	return rups, err
+// allRup load all rupitem with using provided rethinkdb cursor c
+func allRup(c *r.Cursor) ([]RupItem, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
+	rups := make([]RupItem, 0)
+	if err := c.All(&rups); err != nil {
+		return nil, ErrInQuery
+	}
+	return rups, nil
+
 }
 
-func (s *rupService) Exists(ctx context.Context, t Type, key string) bool {
-	return s.Exists(ctx, t, key)
+// loadOpd load single opditem with id key using provided rethinkdb cursor c
+func loadOpd(c *r.Cursor, key string) (*OpdItem, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
+	opd := &OpdItem{}
+	if err := c.One(&opd); err != nil {
+		return nil, ErrInQuery
+	}
+	return opd, nil
+
+}
+
+// allOpd load all opditem using provided rethinkdb cursor `c`
+func allOpd(c *r.Cursor) ([]OpdItem, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
+	opds := make([]OpdItem, 0)
+	if err := c.All(&opds); err != nil {
+		return nil, ErrInQuery
+	}
+	return opds, nil
+
+}
+
+// loadPacket load single packetitem with id `key` using provided rethinkdb cursor `c`
+func loadPacket(c *r.Cursor, key string) (*PacketItem, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
+	pck := &PacketItem{}
+	if err := c.One(&pck); err != nil {
+		return nil, ErrInQuery
+	}
+	return pck, nil
+
+}
+
+// allPacket load all packetitem using provided rethinkdb cursor `c`
+func allPacket(c *r.Cursor) ([]PacketItem, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
+
+	pcks := make([]PacketItem, 0)
+	if err := c.All(&pcks); err != nil {
+		return nil, ErrInQuery
+	}
+
+	return pcks, nil
+}
+
+// loadItem load single specific item based on tipe `t` and id `key` using
+// provided rethinkdb Cursor `c`
+func loadItem(c *r.Cursor, t Type, key string) (*Result, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
+	if !t.IsValid() {
+		return nil, ErrInvalidType
+	}
+	res := &Result{Tipe: t}
+	switch t {
+	case TypeRup:
+		rup, err := loadRup(c, key)
+		if err != nil {
+			return nil, err
+		}
+		res.Data = rup
+	case TypeOpd:
+		opd, err := loadOpd(c, key)
+		if err != nil {
+			return nil, err
+		}
+		res.Data = opd
+	case TypePacket:
+		pck, err := loadPacket(c, key)
+		if err != nil {
+			return nil, err
+		}
+		res.Data = pck
+	}
+	return res, nil
+}
+
+// allItem load all item with specific tipe `t` using provided rethinkdb cursor `c`
+func allItem(c *r.Cursor, t Type) (*Result, error) {
+	if c == nil {
+		return nil, ErrNoCursorProvided
+	}
+	if !t.IsValid() {
+		return nil, ErrInvalidType
+	}
+
+	res := &Result{Tipe: t}
+
+	switch t {
+	case TypeRup:
+		rups, err := allRup(c)
+		if err != nil {
+			return nil, err
+		}
+		res.Data = rups
+
+	case TypeOpd:
+		opds, err := allOpd(c)
+		if err != nil {
+			return nil, err
+		}
+		res.Data = opds
+
+	case TypePacket:
+		pcks, err := allPacket(c)
+		if err != nil {
+			return nil, err
+		}
+		res.Data = pcks
+	}
+
+	return res, nil
 }
