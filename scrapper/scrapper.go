@@ -3,25 +3,40 @@ package scrapper
 import (
 	"encoding/json"
 	"errors"
-	"log"
 
 	"picollo/model"
 
 	"github.com/gocolly/colly"
 )
 
-type rupResponse struct {
+var (
+	ErrCollyinVisit  = errors.New("Error colly collector error in visit")
+	ErrOnNilResults  = errors.New("Error on Nil Results params")
+	ErrOnNilResponse = errors.New("Error on nil rup response params")
+)
+
+type RupResponse struct {
 	AaData               [][]string `json:"aaData"`
 	ITotalDisplayRecords int        `json:"iTotalDisplayRecords"`
 	SEcho                int        `json:"sEcho"`
 }
 
 type Scrapper interface {
-	Scrape(url string) (*Results, error)
+	Scrape(u string) (*Results, error)
+	UnMarshall(r *Results) (*RupResponse, error)
 }
 
 type Results struct {
 	Body []byte
+}
+
+// marshall Result Body to RupResponse
+func (r *Results) unmarshallToResponse(res *RupResponse) error {
+	if res == nil {
+		return ErrOnNilResponse
+	}
+	err := json.Unmarshal(r.Body, res)
+	return err
 }
 
 type collyScrapper struct {
@@ -36,22 +51,11 @@ func New(c *colly.Collector, s model.Service) Scrapper {
 	}
 }
 
+// Scrape visit the url and set the response Results body to colly response
 func (f *collyScrapper) Scrape(url string) (*Results, error) {
-	if url == "" { //should valid
-		return nil, errors.New("null url to scrape")
-	}
-	res, err := f.visit(url)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return res, nil
-}
-
-func (f *collyScrapper) visit(url string) (*Results, error) {
 	err := f.client.Visit(url)
 	if err != nil {
-		log.Fatal(err)
-		return nil, errors.New("collector error in visit")
+		return nil, ErrCollyinVisit
 	}
 
 	res := &Results{}
@@ -63,70 +67,15 @@ func (f *collyScrapper) visit(url string) (*Results, error) {
 	return res, nil
 }
 
-//decode unmarshall from Results byte to rupResponse in the form json
-func (f *collyScrapper) decode(b *Results) (*rupResponse, error) {
+// UnMarshall unmarshall Results to RupResponse in the form json
+func (f *collyScrapper) UnMarshall(b *Results) (*RupResponse, error) {
 	if b == nil {
-		return nil, errors.New("Nil results params")
+		return nil, ErrOnNilResults
 	}
-	resp := &rupResponse{}
-	err := json.Unmarshal(b.Body, resp)
+	resp := &RupResponse{}
+	err := b.unmarshallToResponse(resp)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 	return resp, nil
 }
-
-// // Fetch rup with spesific option and return response
-// func (f *collyScrapper) fetchRup(opt model.RupOptions) (*rupResponse, error) {
-// 	b := NewLinkBuilder(UseRupOption(opt))
-// 	link, err := b.buildPath()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 		return nil, errors.New("error in fetchRup")
-// 	}
-
-// 	resp, err := f.unmarshall(link.String())
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	return resp, nil
-// }
-
-// // Fetch rekap rup with spesific option and return response
-// func (f *collyScrapper) fetchRekap(opt model.RupOptions) (*rupResponse, error) {
-// 	b := NewLinkBuilder(
-// 		UseRupOption(opt),
-// 		UseRekap(true),
-// 	)
-// 	link, err := b.buildPath()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	resp, err := f.unmarshall(link.String())
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// 	return resp, nil
-// }
-
-// func (f *collyScrapper) unmarshall(link string) (*rupResponse, error) {
-// 	response := &rupResponse{}
-// 	f.client.OnResponse(func(r *colly.Response) {
-// 		err := json.Unmarshal(r.Body, response)
-// 		if err != nil {
-// 			log.Fatalln(err)
-// 		}
-// 	})
-
-// 	f.client.OnError(func(r *colly.Response, err error) {
-// 		log.Println("error:", r.StatusCode, err)
-// 	})
-
-// 	if err := f.client.Visit(link); err != nil {
-// 		log.Fatal(err)
-// 		return nil, errors.New("collector error in visit")
-// 	}
-// 	f.client.Wait()
-// 	return response, nil
-// }

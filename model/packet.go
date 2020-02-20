@@ -11,7 +11,6 @@ type PacketItem struct {
 }
 
 type PacketResponse struct {
-	Draw            string          `json:"draw"`
 	RecordsTotal    int             `json:"recordsTotal"`
 	RecordsFiltered int             `json:"recordsFiltered"`
 	Data            [][]interface{} `json:"data"`
